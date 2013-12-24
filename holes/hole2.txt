@@ -1,0 +1,7 @@
+-65,0 65,0 65,7 -65,7 ground1 GREEN # sol
+-16,7 15,7 15,14 2,14 ground2 GREEN # montée
+15,7 17,7 17,9 15,9 ground4 GREEN # en dessous du trou
+17,14 17,7 48,7 30,14 ground3 GREEN # descente
+17,14 17,23 17,14 flagStake RED # mât du drapeau: planté à 17,17
+17,23 18,22 17,21 flag RED # drapeau
+15,9 17,9 17,10 15,10 holeSensor null # 
