@@ -223,10 +223,10 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
           
           
           /* Launch the simulation */
-          while( !hasEverybodyFinishedHole ) { // Infinite loop
+          while( !hasEverybodyFinishedHole ) {
           
           
-             // on actualise ball.previousPos une fois par seconde
+             // we actualize ball.previousPos once per second
              if (tourDeBoucle == 60) {
                double ecart_x = (double)(currentPlayer.ball.getPosition().x - currentPlayer.getPreviousPos().x);
                double ecart_y = (double)(currentPlayer.ball.getPosition().y - currentPlayer.getPreviousPos().y);
@@ -238,32 +238,18 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
                   currentPlayer.ball.setType(BodyType.STATIC); // we set to static, else the ball will fall when we set it to sensor
                   currentPlayer.ball.getFixtureList().setSensor(true); // we set to sensor to avoid collisions with other balls
                   currentPlayer.isBallRolling = false;
+                  
                   // we search for the next player, we skip those who already finished the hole
-             	  	 int n = currentPlayer.number;
-             	  	 do {
-             	  	   if (n == numberOfPlayer-1)
-             	  	     n = 0;
-             	  	   else
-             	  	     n++;
-             	  	 } while ( player[n].hasFinishedHole == true );  // don't put currentPlayer instead of player[n] !!!
+             	  	 this.nextPlayer();
              	  	 
-             	  	 // here, we have found the next player's number, so we prepair him to play 
-             	  	 currentPlayer = player[n];  panel.setCurrentPlayer(currentPlayer);
-           	  	   currentPlayer.ball.getFixtureList().setSensor(false);
-           	  	   currentPlayer.ball.setType(BodyType.DYNAMIC);
-             	  	 System.out.println("Now it's the turn of " + currentPlayer.getName() );
-             	  	 if ( ! currentPlayer.isBallSet ) { // if it's the player first shot, we put the ball at the beginning of the hole
-             	  	   currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
-             	  	   currentPlayer.isBallSet = true;
-             	  	 }
                }
-               currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // PROBLEM (?): this may be a different player 
+               currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // don't change, else dist never < 0.1 !!
                tourDeBoucle = 0;
              }
              tourDeBoucle++;
           
              // we check if we have to draw the pointer which show the angle
-             if ( !currentPlayer.isBallRolling ) {
+             if ( currentPlayer.isBallRolling == false ) {
                 Vec2 ball_pos = currentPlayer.ball.getPosition();
                 double cos = java.lang.Math.cos((double)currentPlayer.getAngleRadian());
            	    double sin = java.lang.Math.sin((double)currentPlayer.getAngleRadian());
@@ -296,6 +282,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            Sprite.extractSprite(contact.getFixtureA().getBody()).getName().equals("holeSensor") ) ) {
               currentPlayer.hasFinishedHole = true;
               System.out.println(currentPlayer.getName() + " has finished");
+              //this.nextPlayer();  // infinite loop if all player have finished the hole
         }
         
         // we check if all player have finished the hole
@@ -402,4 +389,29 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
     public void keyReleased(KeyEvent e) {
     }
+    private void nextPlayer() {
+       // change the current player to the next who hasn't finished the hole
+       int n = currentPlayer.number;
+  	  	 do {
+  	  	   if (n == numberOfPlayer-1)
+  	  	     n = 0;
+  	  	   else
+  	  	     n++;
+  	  	   // to avoid infinite loop:
+  	  	   if ( hasEverybodyFinishedHole == true )
+  	  	     return;
+  	  	 } while ( player[n].hasFinishedHole == true );  // don't put currentPlayer instead of player[n] !!!
+  	  	 // here, we can actualize current player
+  	  	 currentPlayer = player[n];  panel.setCurrentPlayer(currentPlayer);
+  	  	 // we prepair him to play 
+	  	   currentPlayer.ball.getFixtureList().setSensor(false);
+	  	   currentPlayer.ball.setType(BodyType.DYNAMIC);
+  	  	 System.out.println("Now it's the turn of " + currentPlayer.getName() );
+  	  	 if ( ! currentPlayer.isBallSet ) { // if it's the player first shot, we put the ball at the beginning of the hole
+  	  	   currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
+  	  	   currentPlayer.isBallSet = true;
+  	  	 }
+  	  	 currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // new player, so we must actualize coord of the ball
+    }
 }
+
