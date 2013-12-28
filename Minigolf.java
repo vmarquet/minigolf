@@ -120,10 +120,19 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        // creation of an object Player for each player
        System.out.println("You choose " + Integer.toString(numberOfPlayer) + " player(s)");
        player = new Player[numberOfPlayer];
-       for (int i=0; i<numberOfPlayer; i++)
-         player[i] = new Player(i);
+       for (int i=0; i<numberOfPlayer; i++) {
+         // we display a popup to get the name of the player
+         String num = Integer.toString(i+1);
+         String name = JOptionPane.showInputDialog(null, 
+         "Please choose a name for player " + num, "Player "+num, JOptionPane.INFORMATION_MESSAGE);
+         if ( name == null )
+           player[i] = new Player(i, "Player " + Integer.toString(i+1));
+         else
+           player[i] = new Player(i, name);
+         //System.out.println("New player: " + player[i].getName());
+       }
        panel.setPlayer(this.player);
-         
+       
        gameMode = 2; panel.setGameMode(2);
        return;
     }
@@ -242,7 +251,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
              	  	 currentPlayer = player[n];  panel.setCurrentPlayer(currentPlayer);
            	  	   currentPlayer.ball.getFixtureList().setSensor(false);
            	  	   currentPlayer.ball.setType(BodyType.DYNAMIC);
-             	  	 System.out.println("Now it's the turn of player " + Integer.toString(currentPlayer.number+1));
+             	  	 System.out.println("Now it's the turn of " + currentPlayer.getName() );
              	  	 if ( ! currentPlayer.isBallSet ) { // if it's the player first shot, we put the ball at the beginning of the hole
              	  	   currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
              	  	   currentPlayer.isBallSet = true;
@@ -286,7 +295,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            ( Sprite.extractSprite(contact.getFixtureB().getBody()).getName().equals("ballPlayer"+Integer.toString(n)) &&
            Sprite.extractSprite(contact.getFixtureA().getBody()).getName().equals("holeSensor") ) ) {
               currentPlayer.hasFinishedHole = true;
-              System.out.println("Player " + Integer.toString(n+1) + " has finished");
+              System.out.println(currentPlayer.getName() + " has finished");
         }
         
         // we check if all player have finished the hole
@@ -340,7 +349,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            	    int power = currentPlayer.getPower();
            	  	 currentPlayer.ball.applyForceToCenter(new Vec2((int)(3*power*cos),(int)(3*power*sin))); // en Newton
            	  	 currentPlayer.isBallRolling = true;
-           	  	 System.out.println("Player " + Integer.toString(currentPlayer.number+1) + " shot");
+           	  	 System.out.println(currentPlayer.getName() + " shot");
            	  	 
            	  }
          	  }

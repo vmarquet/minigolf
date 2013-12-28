@@ -11,6 +11,7 @@ import java.awt.*;  // for JPanel
 public class Player
 {
    public int number;  // start from 0, not 1
+   private String name;
    public Body ball;   // called "ballPlayerN"
    public boolean isBallSet;  // to make the ball appear when the player play for the first time in the hole
    public boolean isBallRolling;  // to now when to make next player play 
@@ -23,8 +24,9 @@ public class Player
    //Panel reticule;
    
    
-   public Player(int number) {
+   public Player(int number, String name) {
       this.number = number;
+      this.name = name;
       this.score = 0;
       this.angle = 40;
       this.power = 50;
@@ -83,6 +85,9 @@ public class Player
       this.previousPos.x = pos.x;
       this.previousPos.y = pos.y;
       return;
+   }
+   public String getName() {
+      return this.name;
    }
 }
 
