@@ -16,6 +16,7 @@ import javax.swing.*;
 import java.util.*;
 import java.io.*;
 import fr.atis_lab.physicalworld.*;
+import sources.*;
 
 // Compilation:
 // javac -cp ./lib/*:. Minigolf.java
@@ -49,7 +50,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     public Minigolf() {
        this.numberOfPlayerMax = 6;
        this.tourDeBoucle = 0;
-       this.updatePowerJauge = false;
        this.panel = new DrawingPanel(new Dimension(1280,720), 10f);
        frame = new JFrame("Virtual Minigolf  [1280*720]");
        Image icon = new ImageIcon("./img/icon2.png").getImage();
@@ -69,7 +69,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
     
     public void menu() {
-       gameMode = 1;
+       gameMode = 1; panel.setGameMode(1);
        // we create a temporary world just to do the background of the titlescreen
        world = new PhysicalWorld(new Vec2(0,-9.81f), -64, 64, 0, 72, Color.WHITE);
        world.setContactListener(this);
@@ -98,7 +98,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        
        // we get the number of players
        isNumberOfPlayerSet = false;
-       numberOfPlayer = 1;  // default value
+       numberOfPlayer = 1;  panel.setNumberOfPlayer(numberOfPlayer); // default value
        
        try {
          float timeStep = 1/60.0f;  // 60 FPS
@@ -122,8 +122,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        player = new Player[numberOfPlayer];
        for (int i=0; i<numberOfPlayer; i++)
          player[i] = new Player(i);
+       panel.setPlayer(this.player);
          
-       gameMode = 2;
+       gameMode = 2; panel.setGameMode(2);
        return;
     }
        
@@ -136,7 +137,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          player[i].hasFinishedHole = false;
          player[i].isBallRolling = false;
          player[i].isBallSet = false;
-         
        }
        hasEverybodyFinishedHole = false;
        
@@ -169,40 +169,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          // we read the .txt file which contain the configuration of the hole:
          HoleGenerator hg = new HoleGenerator(n, world);
          
-         
-         LinkedList<Vec2> powerJauge = new LinkedList<Vec2>();
-         powerJauge.add(new Vec2(-60,30));
-         powerJauge.add(new Vec2(-55,30));
-         powerJauge.add(new Vec2(-55,52));
-         powerJauge.add(new Vec2(-60,52));
-         try {
-            blob = world.addPolygonalObject(powerJauge, BodyType.STATIC, 
-                   new Vec2(0, 0), 0, new Sprite("powerJauge", 0, Color.BLUE, null));
-            blob.getFixtureList().setSensor(true);
-         } catch(InvalidPolygonException ex) {
-            System.err.println(ex.getMessage());
-            System.exit(-1);
-         } 
-         powerJaugeVariable = new LinkedList<Vec2>();
-         powerJaugeVariable.add(new Vec2(-59,31));
-         powerJaugeVariable.add(new Vec2(-56,31));
-         powerJaugeVariable.add(new Vec2(-56,41));
-         powerJaugeVariable.add(new Vec2(-59,41));
-         try {
-            blob = world.addPolygonalObject(powerJaugeVariable, BodyType.STATIC, 
-                   new Vec2(0, 0), 0, new Sprite("powerJaugeVariable", 0, Color.YELLOW, null));
-            blob.getFixtureList().setSensor(true);
-         } catch(InvalidPolygonException ex) {
-            System.err.println(ex.getMessage());
-            System.exit(-1);
-         } 
-         
 
-         // ATH: affichage du score, etc
-         blob = world.addRectangularObject(12f, 6f, BodyType.STATIC, new Vec2(-54, 66), 0, 
-                new Sprite("ATH", 2, Color.BLUE, new ImageIcon("./img/ATH.png")));
-         blob.getFixtureList().setSensor(true);
-         
          // affichage du pointeur de tir
          pointer = world.addCircularObject(0.2f, BodyType.STATIC, new Vec2(-50, 10), 0, 
                    new Sprite("pointer", 1, Color.RED, null));
@@ -245,15 +212,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
           int msSleep = Math.round(1000*timeStep); // timeStep in milliseconds
           world.setTimeStep(timeStep); // Set the timeStep of the PhysicalWorld
           
-
-          /* Launch the simulation */
-          while(true) { // Infinite loop
           
-             if (updatePowerJauge == true)
-               updatePowerJauge();
-             updatePowerJauge = false;
-             
-                
+          /* Launch the simulation */
+          while( !hasEverybodyFinishedHole ) { // Infinite loop
+          
+          
              // on actualise ball.previousPos une fois par seconde
              if (tourDeBoucle == 60) {
                double ecart_x = (double)(currentPlayer.ball.getPosition().x - currentPlayer.getPreviousPos().x);
@@ -261,28 +224,31 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
                double dist = java.lang.Math.sqrt((double)ecart_x*(double)ecart_x + ecart_y*ecart_y);
                
                // we check if the ball has stopped or nearly, and next player
-               if (dist < 0.1 && currentPlayer.isBallRolling==true) {
+               if (dist < 0.1 && currentPlayer.isBallRolling==true) {  // if the ball is nearly stopped
                   currentPlayer.ball.setLinearVelocity(new Vec2(0,0));  // we stop completely the ball
                   currentPlayer.ball.setType(BodyType.STATIC); // we set to static, else the ball will fall when we set it to sensor
                   currentPlayer.ball.getFixtureList().setSensor(true); // we set to sensor to avoid collisions with other balls
                   currentPlayer.isBallRolling = false;
-                  // next player
+                  // we search for the next player, we skip those who already finished the hole
              	  	 int n = currentPlayer.number;
              	  	 do {
              	  	   if (n == numberOfPlayer-1)
              	  	     n = 0;
              	  	   else
              	  	     n++;
-             	  	   currentPlayer = player[n];
-             	  	   currentPlayer.ball.getFixtureList().setSensor(false);
-             	  	   currentPlayer.ball.setType(BodyType.DYNAMIC);
-             	  	 }
-             	  	 while ( currentPlayer.hasFinishedHole == true );
+             	  	 } while ( player[n].hasFinishedHole == true );  // don't put currentPlayer instead of player[n] !!!
+             	  	 
+             	  	 // here, we have found the next player's number, so we prepair him to play 
+             	  	 currentPlayer = player[n];  panel.setCurrentPlayer(currentPlayer);
+           	  	   currentPlayer.ball.getFixtureList().setSensor(false);
+           	  	   currentPlayer.ball.setType(BodyType.DYNAMIC);
              	  	 System.out.println("Now it's the turn of player " + Integer.toString(currentPlayer.number+1));
-             	  	 if ( ! currentPlayer.isBallSet )
+             	  	 if ( ! currentPlayer.isBallSet ) { // if it's the player first shot, we put the ball at the beginning of the hole
              	  	   currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
+             	  	   currentPlayer.isBallSet = true;
+             	  	 }
                }
-               currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());
+               currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // PROBLEM (?): this may be a different player 
                tourDeBoucle = 0;
              }
              tourDeBoucle++;
@@ -311,12 +277,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
 
     
-    
-    public void drawATH() {
-       
-       return;
-    }
-    
     /* Event when object are touching */
     public void beginContact(Contact contact) {
         int n = currentPlayer.number;
@@ -326,9 +286,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            ( Sprite.extractSprite(contact.getFixtureB().getBody()).getName().equals("ballPlayer"+Integer.toString(n)) &&
            Sprite.extractSprite(contact.getFixtureA().getBody()).getName().equals("holeSensor") ) ) {
               currentPlayer.hasFinishedHole = true;
-              
               System.out.println("Player " + Integer.toString(n+1) + " has finished");
         }
+        
         // we check if all player have finished the hole
         // if yes, we change the flag:
         int m=0;
@@ -388,7 +348,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          case KeyEvent.VK_RIGHT:
             if (gameMode == 1) {
               if(numberOfPlayer < numberOfPlayerMax) {
-                numberOfPlayer++;
+                numberOfPlayer++;  panel.setNumberOfPlayer(numberOfPlayer);
                 menuball[numberOfPlayer-1].setTransform(new Vec2(13+2*(numberOfPlayer-1),32), 0);
               }
             }
@@ -398,7 +358,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          case KeyEvent.VK_LEFT:
             if (gameMode == 1) {
               if(numberOfPlayer > 1) {
-                numberOfPlayer--;
+                numberOfPlayer--;  panel.setNumberOfPlayer(numberOfPlayer);
                 menuball[numberOfPlayer].setTransform(new Vec2(0,-10), 0);
               }
             }
@@ -408,25 +368,23 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          case KeyEvent.VK_DOWN:
             if (gameMode == 1) {
               if(numberOfPlayer > 1) {
-                numberOfPlayer--;
+                numberOfPlayer--;  panel.setNumberOfPlayer(numberOfPlayer);
                 menuball[numberOfPlayer].setTransform(new Vec2(0,-10), 0);
               }
             }
             if (gameMode == 2) {
            	  currentPlayer.decreasePower();
-           	  updatePowerJauge = true;
            	}
             break;
          case KeyEvent.VK_UP:
             if (gameMode == 1) {
               if(numberOfPlayer < numberOfPlayerMax) {
-                numberOfPlayer++;
+                numberOfPlayer++;  panel.setNumberOfPlayer(numberOfPlayer);
                 menuball[numberOfPlayer-1].setTransform(new Vec2(13+2*(numberOfPlayer-1),32), 0);
               }
             }
             if (gameMode == 2) {
            	  currentPlayer.increasePower();
-           	  updatePowerJauge = true;
            	}
             break;
        }
@@ -434,38 +392,5 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     public void keyTyped(KeyEvent e) {
     }
     public void keyReleased(KeyEvent e) {
-    }
-    private void updatePowerJauge() {
-       try {
-          try {
-             world.destroyObject("powerJaugeVariable");
-          } catch(Exception ex) {
-             System.err.println(ex.getMessage());
-             System.exit(-1);
-          }
-          
-             
-       	  powerJaugeVariable = new LinkedList<Vec2>();
-          powerJaugeVariable.add(new Vec2(-59,31));
-          powerJaugeVariable.add(new Vec2(-56,31));
-          powerJaugeVariable.add(new Vec2(-56,31+currentPlayer.getPower()/10*2));
-          powerJaugeVariable.add(new Vec2(-59,31+currentPlayer.getPower()/10*2));
-          try {
-             if(currentPlayer.getPower() < 35)
-                blob = world.addPolygonalObject(powerJaugeVariable, BodyType.STATIC, new Vec2(0, 0), 0, new Sprite("powerJaugeVariable", 0, Color.GREEN, null));
-             if(currentPlayer.getPower() >= 35 && currentPlayer.getPower() < 65)
-                blob = world.addPolygonalObject(powerJaugeVariable, BodyType.STATIC, new Vec2(0, 0), 0, new Sprite("powerJaugeVariable", 0, Color.YELLOW, null));
-             if(currentPlayer.getPower() >= 65)
-                blob = world.addPolygonalObject(powerJaugeVariable, BodyType.STATIC, new Vec2(0, 0), 0, new Sprite("powerJaugeVariable", 0, Color.RED, null));
-             blob.getFixtureList().setSensor(true);
-          } catch(InvalidPolygonException ex) {
-             System.err.println(ex.getMessage());
-             System.exit(-1);
-          } 
-       }
-       catch (InvalidSpriteNameException ex) {
-           ex.printStackTrace();
-           System.exit(-1);
-       }
     }
 }
