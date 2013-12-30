@@ -142,18 +142,60 @@ public class DrawingPanel extends JPanel implements Serializable {
         	 // world.paint appelle Sprite.paint() sur tous les sprites du tableau de sprites
         }
         
-        // ATH DRAWING
+        // HUD DRAWING
         if (this.gameMode == 2) {
-           imageGraphics.setColor(Color.BLUE);
-           ImageIcon ATH = new ImageIcon("./img/ATH2.png");
+        
+           //ImageIcon ATH = new ImageIcon("./img/ATH2.png");
+           int step = 140;  // space in pixels between player's HUD
            for (int i=0; i<this.numberOfPlayer; i++) {
-              int step = 130;  // space in pixels between player's HUD
-              imageGraphics.drawRect(50+i*step,50,100,50);
-              ATH.paintIcon(this, imageGraphics, 50+i*step, 50);
+              
+              int leftCornerX = 50+i*step;
+              int leftCornerY = 50;
+              imageGraphics.setColor(Color.BLUE);
+              imageGraphics.drawRect(leftCornerX,leftCornerY,115,38);
+              //ATH.paintIcon(this, imageGraphics, leftCornerX, leftCornerY);
+              
+              // we draw some Strings: the name of the player, and his score
+              imageGraphics.setColor(Color.WHITE);
+              imageGraphics.drawString(player[i].getName(), leftCornerX,leftCornerY);
+              imageGraphics.drawString("Total Score", leftCornerX+5,leftCornerY+16);
+              String totalScore = Integer.toString(player[i].getTotalScore());
+              imageGraphics.drawString(totalScore, leftCornerX+90,leftCornerY+16);
+              imageGraphics.drawString("Level Score", leftCornerX+5,leftCornerY+31);
+              String levelScore = Integer.toString(player[i].getLevelScore());
+              imageGraphics.drawString(levelScore, leftCornerX+90,leftCornerY+31);
+              
            }
            // drawing of the power bar:
+           imageGraphics.setColor(Color.BLUE);
            imageGraphics.drawRect(30, 198, 30, 204);
+           if (currentPlayer.getPower() < 40)
+             imageGraphics.setColor(Color.GREEN);
+           else if (currentPlayer.getPower() < 75)
+             imageGraphics.setColor(Color.YELLOW);
+           else
+             imageGraphics.setColor(Color.RED);
            imageGraphics.fillRect(32, 400-2*currentPlayer.getPower(), 26, 2*currentPlayer.getPower());
+           
+           // draw an icon to show whoose turn it is
+           imageGraphics.setColor(Color.WHITE);
+           int var = currentPlayer.number*step;
+           // if we want the symbol to be a ball:
+           //imageGraphics.drawOval(40+var, 64, 10,10);
+           // if we want the symbol to be a triangle:
+           imageGraphics.setColor(Color.RED);
+           int[] pointsX = new int[3];
+           pointsX[0] = 40 + var; pointsX[1] = 40 + var; pointsX[2] = 47 + var;
+           int[] pointsY = new int[3];
+           pointsY[0] = 62; pointsY[1] = 70; pointsY[2] = 66;
+           imageGraphics.fillPolygon(pointsX, pointsY, 3);
+           
+           
+           // drawing of the level par:
+           imageGraphics.setColor(Color.WHITE);
+           imageGraphics.drawString("Level Par :", 590, 25);
+           String par = Integer.toString(world.getPar());
+           imageGraphics.drawString(par, 660, 25);
         }
         
         /* Painting the JPanel as a crop from the buffer image */

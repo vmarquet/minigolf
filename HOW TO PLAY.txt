@@ -1,0 +1,19 @@
+MENU:
+- Choose the number of players with the arrows of your keyboard
+- You can skip the "Choose a name" dialogs, a default name will be used
+
+IN-GAME:
+- Set the power of the shot with the UP and DOWN arrows
+- Set the angle of the shot with the LEFT and RIGHT arrows
+- Shoot with SPACE
+
+You can quit the game with CTRL+Q
+
+RULES:
+- The "Par" is the number of shots a good player would do to finish the level
+- The "Level Score" is the number of shots you made in order to put the ball in the hole
+  You have 7 shots maximum to finish
+  If after the 7 shots, you have not finished, you take 1 point of penalty
+- The "Total Score" is the difference beetween your score and the par
+  For a good player, his total score should be around 0
+  In multiplayer mode, the winner is the closest to the par

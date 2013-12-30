@@ -125,11 +125,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          String num = Integer.toString(i+1);
          String name = JOptionPane.showInputDialog(null, 
          "Please choose a name for player " + num, "Player "+num, JOptionPane.INFORMATION_MESSAGE);
-         if ( name == null )
+         if ( name == null || name.equals("") )
            player[i] = new Player(i, "Player " + Integer.toString(i+1));
          else
            player[i] = new Player(i, name);
-         //System.out.println("New player: " + player[i].getName());
+         System.out.println("New player: " + player[i].getName());
        }
        panel.setPlayer(this.player);
        
@@ -146,8 +146,10 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          player[i].hasFinishedHole = false;
          player[i].isBallRolling = false;
          player[i].isBallSet = false;
+         player[i].resetLevelScore();
        }
        hasEverybodyFinishedHole = false;
+       int par = 0;  // to avoid the "variable might not have been initialized" due to the try catch
        
        // public PhysicalWorld(Vec2 gravity, float xmin, float xmax, float ymin, float ymax, Color borderColor)
        world = new PhysicalWorld(new Vec2(0,-9.81f), -64, 64, 0, 72, Color.WHITE); // 64 - (-64) = 128 = 1280/10
@@ -169,7 +171,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            // on peut aussi fixer la densité: density
          }
          // we prepair player[0] to play
-         currentPlayer = player[0];
+         currentPlayer = player[0];  panel.setCurrentPlayer(currentPlayer);
          currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
          currentPlayer.ball.getFixtureList().setSensor(false);
          currentPlayer.ball.setType(BodyType.DYNAMIC);
@@ -177,6 +179,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          
          // we read the .txt file which contain the configuration of the hole:
          HoleGenerator hg = new HoleGenerator(n, world);
+         par = world.getPar();
          
 
          // affichage du pointeur de tir
@@ -211,6 +214,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        
        this.run();
        
+       for (int i=0; i<numberOfPlayer; i++) {
+          player[i].updateTotalScore( player[i].getLevelScore() - par );
+       }
     }
 
     // Simulation loop
@@ -235,15 +241,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
                // we check if the ball has stopped or nearly, and next player
                if (dist < 0.1 && currentPlayer.isBallRolling==true) {  // if the ball is nearly stopped
                   currentPlayer.ball.setLinearVelocity(new Vec2(0,0));  // we stop completely the ball
-                  currentPlayer.ball.setType(BodyType.STATIC); // we set to static, else the ball will fall when we set it to sensor
-                  currentPlayer.ball.getFixtureList().setSensor(true); // we set to sensor to avoid collisions with other balls
-                  currentPlayer.isBallRolling = false;
-                  
                   // we search for the next player, we skip those who already finished the hole
              	  	 this.nextPlayer();
              	  	 
                }
-               currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // don't change, else dist never < 0.1 !!
+               currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // don't change this line, else dist never < 0.1 !!
                tourDeBoucle = 0;
              }
              tourDeBoucle++;
@@ -282,7 +284,8 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            Sprite.extractSprite(contact.getFixtureA().getBody()).getName().equals("holeSensor") ) ) {
               currentPlayer.hasFinishedHole = true;
               System.out.println(currentPlayer.getName() + " has finished");
-              //this.nextPlayer();  // infinite loop if all player have finished the hole
+              //this.nextPlayer();  // useless if it's the last player to finish the hole
+              // WARNING: the if(dist<0.1 ...) code is not read, maybe it's why there is a bug 
         }
         
         // we check if all player have finished the hole
@@ -337,7 +340,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            	  	 currentPlayer.ball.applyForceToCenter(new Vec2((int)(3*power*cos),(int)(3*power*sin))); // en Newton
            	  	 currentPlayer.isBallRolling = true;
            	  	 System.out.println(currentPlayer.getName() + " shot");
-           	  	 
+           	  	 currentPlayer.addShot();
            	  }
          	  }
             break;
@@ -389,8 +392,12 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
     public void keyReleased(KeyEvent e) {
     }
-    private void nextPlayer() {
-       // change the current player to the next who hasn't finished the hole
+    private void nextPlayer() {  // change the current player to the next who hasn't finished the hole
+       // operations on the ball
+       currentPlayer.ball.setType(BodyType.STATIC); // we set to static, else the ball will fall when we set it to sensor
+       currentPlayer.ball.getFixtureList().setSensor(true); // we set to sensor to avoid collisions with other balls
+       currentPlayer.isBallRolling = false;
+       // we search for the next player
        int n = currentPlayer.number;
   	  	 do {
   	  	   if (n == numberOfPlayer-1)

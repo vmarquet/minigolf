@@ -22,6 +22,14 @@ public class HoleGenerator
         Body pointer;
         
         try {
+           
+           // we scan the first line to get the par of the level
+           if ( ! in.hasNextInt() )
+             invalidFileExit(1);
+           int par = in.nextInt();
+           world.setPar(par);
+           in.nextLine();
+           
            while(in.hasNextLine())
            {
               LinkedList<Vec2> ground = new LinkedList<Vec2>();
@@ -29,7 +37,7 @@ public class HoleGenerator
               String[] word = line.split("#");
               //System.out.println(word[0] + " SPLIT " + word[1]);
               if (word.length != 2)
-                invalidFileExit();
+                invalidFileExit(2);
               String[] vect = word[0].split(" ");
               int n = vect.length;
               for (int i=0; i<n-2; i++) {
@@ -106,8 +114,10 @@ public class HoleGenerator
       panel.setCameraPosition(new Vec2(0,36));
       return;
    }
-   private void invalidFileExit() {
+   private void invalidFileExit(int n) {
       System.out.println("ERROR: hole.txt file corrupted, impossible to construct the ground");
+      if (n==1)
+        System.out.println("The first line of the file should contain only an int: the par");
       System.exit(-1);
    }
    

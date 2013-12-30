@@ -33,6 +33,7 @@ public class PhysicalWorld implements Serializable, JbSerializer.ObjectSigner, J
     private long stepIdx;
     private ImageIcon wallIcon;
     private LinkedList<Sprite> spriteList;
+    private int par;
     /**
      * Create a world from gravity, dimensions and wall colors
      * @param gravity Gravity vector
@@ -437,5 +438,13 @@ public class PhysicalWorld implements Serializable, JbSerializer.ObjectSigner, J
      * After deserialization, does specific World need to set some property ? (not used yet)
      */
     public void 	processWorld(org.jbox2d.dynamics.World world, Long tag)  {}
-
+    
+    public void setPar(int par) {
+       this.par = par;
+    }
+    public int getPar() {
+       return this.par;
+    }
 }
+
+
