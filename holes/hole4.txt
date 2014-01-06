@@ -5,6 +5,6 @@ Brokeback Mountain
 -30,7 10,7 -5,45 mountain2 GREEN # center down
 -30,75 10,75 -5,60 mountain4 GREEN # center up
 5,7 35,7 20,25 mountain3 GREEN # right
-0,7 20,7 20,15, 0,15 holeSensor BLUE # sensor
+0,7 20,7 20,15, 0,15 holeSensor null # sensor
 10,12 10,21 10,12 flagStake RED # mât du drapeau
 10,21 11,20 10,19 flag RED # drapeau

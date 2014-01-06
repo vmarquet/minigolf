@@ -1,0 +1,13 @@
+RULES TO CREATE THE HOLE.TXT FILES:
+- the first line is used to give the level a name
+- the second line is used to give the par of the level
+- the next lines are used to create the ground and obstacles of the level:
+   - each line is an object in the physic engine
+   - each couple of numbers is the abscissa and ordonate of a peak of an object
+   - the first word after is the name of the object in the physic engine, it MUST be UNIQUE
+   - the second word if the color of the object. null can be used if you don't want it to be draw
+   - the names "flag", "flagStake" and "holeSensor" are KEYWORDS, you MUST use these names for these objects in the hole.txt file
+   - you must put a '#' at the end of each line
+   - before the '#', use only one space beetween words
+   - after the '#', you can write whatever you want
+- DON'T LET EMPTY LINES AT THE END OF THE FILE !
