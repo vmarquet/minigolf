@@ -34,6 +34,7 @@ public class PhysicalWorld implements Serializable, JbSerializer.ObjectSigner, J
     private ImageIcon wallIcon;
     private LinkedList<Sprite> spriteList;
     private int par;
+    private String levelName;
     /**
      * Create a world from gravity, dimensions and wall colors
      * @param gravity Gravity vector
@@ -445,6 +446,14 @@ public class PhysicalWorld implements Serializable, JbSerializer.ObjectSigner, J
     public int getPar() {
        return this.par;
     }
+    public void setLevelName(String levelName) {
+       this.levelName = levelName;
+    }
+    public String getLevelName() {
+       return this.levelName;
+    }
 }
+
+
 
 

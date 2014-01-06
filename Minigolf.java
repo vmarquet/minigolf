@@ -231,8 +231,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
           
           /* Launch the simulation */
           while( !hasEverybodyFinishedHole ) {
-          
-          
+             
+             frame.setTitle("Virtual Minigolf  [1280*720]  -  " + world.getLevelName() );
+             
              // we actualize ball.previousPos once per second
              if (tourDeBoucle == 60) {
                double ecart_x = (double)(currentPlayer.ball.getPosition().x - currentPlayer.getPreviousPos().x);

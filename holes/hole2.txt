@@ -1,4 +1,5 @@
-2
+Stromboli
+2 # par
 -65,0 65,0 65,7 -65,7 ground1 GREEN # sol
 -16,7 15,7 15,14 2,14 ground2 GREEN # montée
 15,7 17,7 17,9 15,9 ground4 GREEN # en dessous du trou

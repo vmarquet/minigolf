@@ -1,0 +1,4 @@
+Heaven's Gate
+2 # par
+-65,0 65,0 65,7 -65,7 ground1 GREEN # sol, avant le trou
+-65,42 35,42 35,44 -65,44 ground2 GREEN # terrain sur 2 étages

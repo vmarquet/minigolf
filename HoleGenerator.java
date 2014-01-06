@@ -23,6 +23,14 @@ public class HoleGenerator
         
         try {
            
+           String firstLine = in.nextLine();
+           // in case we want to be able to add commentaries in the first line:
+           /*String[] firstLineTab = firstLine.split("#");
+           if (firstLineTab.length != 2)
+             invalidFileExit(0);
+           world.setLevelName(firstLineTab[0]); */
+           world.setLevelName(firstLine);
+           
            // we scan the first line to get the par of the level
            if ( ! in.hasNextInt() )
              invalidFileExit(1);
@@ -100,7 +108,7 @@ public class HoleGenerator
       DrawingPanel panel;
       panel = new DrawingPanel(world, new Dimension(1280,720), 10f);  // 10f: scale
       panel.setBackGroundColor(Color.BLACK);
-      panel.setBackGroundIcon(new ImageIcon("./img/holegenerator.png"));
+      //panel.setBackGroundIcon(new ImageIcon("./img/holegenerator.png"));
       JFrame frame = new JFrame("Virtual Minigolf  [1280*720]");
       Image icon = new ImageIcon("./img/icon2.png").getImage();
       frame.setIconImage(icon);
@@ -116,8 +124,12 @@ public class HoleGenerator
    }
    private void invalidFileExit(int n) {
       System.out.println("ERROR: hole.txt file corrupted, impossible to construct the ground");
+      if (n==0)
+        System.out.println("Error in the first line of the file");
       if (n==1)
         System.out.println("The first line of the file should contain only an int: the par");
+      if (n==2)
+        System.out.println("Error with the split of the line, maybe your forgot '#'");
       System.exit(-1);
    }
    
