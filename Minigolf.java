@@ -169,6 +169,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            player[i].ball.getFixtureList().setRestitution(0.2f);  // bouncing propertie
            player[i].ball.getFixtureList().setFriction(10000000000000f);  // friction propertie (adhérence)
            // on peut aussi fixer la densité: density
+           player[i].ball.setAngularDamping(3); 
          }
          // we prepair player[0] to play
          currentPlayer = player[0];  panel.setCurrentPlayer(currentPlayer);
