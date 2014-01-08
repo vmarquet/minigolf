@@ -2,3 +2,7 @@ Heaven's Gate
 2 # par
 -65,0 65,0 65,7 -65,7 ground1 GREEN # sol, avant le trou
 -65,42 35,42 35,44 -65,44 ground2 GREEN # terrain sur 2 étages
+-48,44 -40,44 -40,51 ground3 GREEN # triangle gauche
+-24,44 -16,44 -24,51 ground4 GREEN # triangle droite
+-40,44 -33,44 -33,51 -40,51 ground5 GREEN # rect gauche 
+-31,44 -24,44 -24,51 -31,51 ground6 GREEN # rect droite

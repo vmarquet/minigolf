@@ -1,7 +1,7 @@
 // idées pour les niveaux: pour simuler de l'eau, mettre des petites boules bleu très légères.
 // si la balle de golf tombe dedans, elle coule au fond et atteint un sensor 
 
-// reste à gérer la rotation et les frottements
+// gestion de l'effet ?
 
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
@@ -147,6 +147,8 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          player[i].isBallRolling = false;
          player[i].isBallSet = false;
          player[i].resetLevelScore();
+         player[i].resetPower();
+         player[i].resetAngle();
        }
        hasEverybodyFinishedHole = false;
        int par = 0;  // to avoid the "variable might not have been initialized" due to the try catch
@@ -185,7 +187,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
 
          // affichage du pointeur de tir
          pointer = world.addCircularObject(0.2f, BodyType.STATIC, new Vec2(-50, 10), 0, 
-                   new Sprite("pointer", 1, Color.RED, null));
+                   new Sprite("pointer", 1, Color.RED, new ImageIcon("./img/pointer.png")));
          pointer.getFixtureList().setSensor(true);
 
 

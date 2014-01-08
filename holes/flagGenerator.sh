@@ -4,6 +4,7 @@
 # which describe the coordinates of the flag and it's stake
 # for that, you only need the position of the base of the flag and this script build it
 # to use this script on Linux, enter in command line: ./flagGenerator.sh
+# you can send the script's response directly to the file: ./flagGenerator.sh >> hole.txt
 
 read -p "Enter the abscissa of the base of the flag: " x
 read -p "Enter the ordonate of the base of the flag: " y

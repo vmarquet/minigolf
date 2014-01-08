@@ -108,7 +108,7 @@ public class HoleGenerator
       DrawingPanel panel;
       panel = new DrawingPanel(world, new Dimension(1280,720), 10f);  // 10f: scale
       panel.setBackGroundColor(Color.BLACK);
-      //panel.setBackGroundIcon(new ImageIcon("./img/holegenerator.png"));
+      panel.setBackGroundIcon(new ImageIcon("./img/holegenerator2.png"));
       JFrame frame = new JFrame("Virtual Minigolf  [1280*720]");
       Image icon = new ImageIcon("./img/icon2.png").getImage();
       frame.setIconImage(icon);

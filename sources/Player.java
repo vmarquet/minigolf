@@ -38,24 +38,19 @@ public class Player
       //reticule = new Panel();
    }
    
-   public void setAngle(int angle) {
-      this.angle = angle;
-      if (this.angle < 0)
-        this.angle = 0;
-      if (this.angle > 180)
-        this.angle = 180;
-      return;
+   public void resetAngle() {
+      this.angle = 45;
    }
    public void increaseAngle() {
       if (this.angle < 180)
-        this.angle += 10;
+        this.angle += 5;
       if (this.angle > 180)
         this.angle = 180;
       return;
    }
    public void decreaseAngle() {
       if (this.angle > 0)
-        this.angle -= 10;
+        this.angle -= 5;
       if (this.angle < 0)
         this.angle = 0;
       return;
@@ -65,20 +60,23 @@ public class Player
    }
    public void increasePower() {
       if (this.power < 100)
-        this.power += 10;
+        this.power += 2;
       if (this.power > 100)
         this.power = 100;
       return;
    }
    public void decreasePower() {
       if (this.power > 10)
-        this.power -= 10;
+        this.power -= 2;
       if (this.power < 10)
         this.power = 10;
       return;
    }
    public int getPower() {
       return this.power;
+   }
+   public void resetPower() {
+      this.power = 50;
    }
    public Vec2 getPreviousPos() {
       return this.previousPos;
