@@ -1,10 +1,8 @@
-Brokeback Mountain
+Heaven's Gate
 2 # par
--65,0 65,0 65,7 -65,7 ground1 GREEN # sol
--40,7 -20,7 -30,25 mountain1 GREEN # MOUNTAINS: left one
--30,7 10,7 -5,45 mountain2 GREEN # center down
--30,75 10,75 -5,60 mountain4 GREEN # center up
-5,7 35,7 20,25 mountain3 GREEN # right
-0,7 20,7 20,15, 0,15 holeSensor null # sensor
-10,12 10,21 10,12 flagStake RED # mât du drapeau
-10,21 11,20 10,19 flag RED # drapeau
+-65,0 65,0 65,7 -65,7 ground1 GREEN # sol, avant le trou
+-65,42 35,42 35,44 -65,44 ground2 GREEN # terrain sur 2 étages
+-48,44 -40,44 -40,51 ground3 GREEN # triangle gauche
+-24,44 -16,44 -24,51 ground4 GREEN # triangle droite
+-40,44 -33,44 -33,51 -40,51 ground5 GREEN # rect gauche 
+-31,44 -24,44 -24,51 -31,51 ground6 GREEN # rect droite

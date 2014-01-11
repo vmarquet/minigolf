@@ -1,4 +1,4 @@
-A l'Ouest rien de nouveau
+Calme plat
 1 # par
 -65,0 56,0 56,7 -65,7 ground1 GREEN # sol, avant le trou
 56,0 58,0 58,4 56,4 ground2 GREEN # sol, en dessous du trou (largeur du trou: 2, profondeur: 4)

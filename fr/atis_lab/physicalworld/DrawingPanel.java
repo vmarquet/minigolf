@@ -3,6 +3,7 @@ package fr.atis_lab.physicalworld;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.image.*;
+import java.util.Scanner;
 import java.io.*;
 import org.jbox2d.common.*;
 import sources.*;
@@ -24,8 +25,10 @@ public class DrawingPanel extends JPanel implements Serializable {
    private int gameMode;
    private int numberOfPlayer;
    public Player[] player;
-   private int[] highScores;
-   private String[] highScoresNames; 
+   private int[] localHighScores;
+   private String[] localHighScoresNames; 
+   private int[] globalHighScores;
+   private String[] globalHighScoresNames; 
    private Player currentPlayer;
    //public Minigolf minigolf;  // how to access Minigolf ? I don't know how to uses packages
    
@@ -206,12 +209,19 @@ public class DrawingPanel extends JPanel implements Serializable {
            int step = 30;
            imageGraphics.setColor(Color.WHITE);
            imageGraphics.drawString("This game's player's high scores", 300, 100);
-           imageGraphics.drawString("(the closest to 0, the better it is)", 300, 100+step);
+           //imageGraphics.drawString("(the closest to 0, the better it is)", 300, 100+step);
            for (int i=0; i<numberOfPlayer; i++) {
-             imageGraphics.drawString( Integer.toString(i+1) + ". " + highScoresNames[i] + 
-             ", score = " + Integer.toString(highScores[i]), 300, 100 + step*(i+2));
+             imageGraphics.drawString( Integer.toString(i+1) + ". " + localHighScoresNames[i] + 
+             ", score = " + Integer.toString(localHighScores[i]), 300, 100 + step*(i+2));
            }
            
+           imageGraphics.setColor(Color.WHITE);
+           imageGraphics.drawString("Global player's high scores", 700, 100);
+           //imageGraphics.drawString("(the closest to 0, the better it is)", 300, 100+step);
+           for (int i=0; i<10; i++) {
+             imageGraphics.drawString( Integer.toString(i+1) + ". " + globalHighScoresNames[i] + 
+             ", score = " + Integer.toString(globalHighScores[i]), 700, 100 + step*(i+2));
+           }
            
         }
         
@@ -239,9 +249,9 @@ public class DrawingPanel extends JPanel implements Serializable {
        return;
     }
     
-    public void computeHighScore() {  
-       this.highScores = new int[6];  // un peu sale parce que j'ai manqué de temps, à refaire proprement
-       this.highScoresNames = new String[6];
+    public void getLocalHighScore() {  
+       this.localHighScores = new int[6];  // un peu sale parce que j'ai manqué de temps, à refaire proprement
+       this.localHighScoresNames = new String[6];
        boolean[] tab = new boolean[numberOfPlayer];
        for (int i=0; i<numberOfPlayer; i++)
          tab[i] = false;  // we will put true when the player's score will be written in int[] highScores
@@ -257,9 +267,51 @@ public class DrawingPanel extends JPanel implements Serializable {
            }
          }
          // now, we know who has the best score
-         highScores[i] = min;
-         highScoresNames[i] = player[jSave].getName();
+         localHighScores[i] = min;
+         localHighScoresNames[i] = player[jSave].getName();
          tab[jSave] = true;
+       }
+    }
+    public void getGlobalHighScore() {
+       this.globalHighScores = new int[10];  // un peu sale parce que j'ai manqué de temps, à refaire proprement
+       this.globalHighScoresNames = new String[10];
+       try {
+          FileReader file = new FileReader("./.score.txt");
+          Scanner in = new Scanner(file);
+          int j=0;
+          for (int i=0; i<10; i++) {  // we keep 10 best scores
+            String line = in.nextLine();
+            String[] tab = line.split(":");
+            while (localHighScores[j] < Integer.parseInt(tab[1]) && j<numberOfPlayer) {  // si on a un score local meilleur
+              globalHighScoresNames[i] = localHighScoresNames[j];
+              globalHighScores[i] = localHighScores[j];
+              i++; j++;
+            }
+            if (i<10) {  // si on n'a pas atteint les 10 noms
+              globalHighScoresNames[i] = tab[0];
+              globalHighScores[i] = Integer.parseInt(tab[1]);
+            }
+          }
+          in.close();
+       }
+       catch (FileNotFoundException e) {
+          System.out.println(e.getMessage());
+          System.out.println("file ./.score.txt not found");
+          System.exit(-1);
+       }
+       
+       
+       // we record the high scores in the file:
+       try {
+          PrintWriter out = new PrintWriter("./.score.txt", "UTF-8");
+          for (int i=0; i<10; i++) {
+             out.println(globalHighScoresNames[i] + ":" + globalHighScores[i]);
+          }
+          out.close();
+       }
+       catch (IOException e) {
+          System.out.println(e.getMessage());
+          System.exit(-1);
        }
     }
 }

@@ -64,7 +64,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     public static void main(String[] args) {
        System.out.println("Welcome to Virtual Minigolf !");
        Minigolf golf = new Minigolf();
-       for(int i=1; i<2; i++)  // i<3
+       for(int i=1; i<3; i++)  // i<3
          golf.playHole(i);
        golf.showHighScores();
        System.out.println("Bye-bye !");
@@ -319,14 +319,15 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     
     public void showHighScores() {
        gameMode = 3; panel.setGameMode(3);
-       panel.computeHighScore();
+       panel.getLocalHighScore();
+       panel.getGlobalHighScore();
        this.panel.updateUI();
        
-       boolean useless = true;
-       while(useless) {  }
+       boolean score = true;
+       while(score) {  }
        
        
-       gameMode = 1; panel.setGameMode(1); // if we want to return to the menu
+       gameMode = 1; panel.setGameMode(1); // if we want to return to the menu (in a future version)
     }
     
     
