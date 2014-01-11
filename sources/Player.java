@@ -12,6 +12,7 @@ public class Player
 {
    public int number;  // start from 0, not 1
    private String name;
+   private Color color;
    public Body ball;   // called "ballPlayerN"
    public boolean isBallSet;  // to make the ball appear when the player play for the first time in the hole
    public boolean isBallRolling;  // to now when to make next player play 
@@ -25,9 +26,10 @@ public class Player
    //Panel reticule;
    
    
-   public Player(int number, String name) {
+   public Player(int number, String name, Color color) {
       this.number = number;
       this.name = name;
+      this.color = color;
       this.totalScore = 0;
       this.levelScore = 0;
       this.angle = 40;
@@ -103,6 +105,9 @@ public class Player
    }
    public void resetLevelScore() {
       this.levelScore = 0;
+   }
+   public Color getColor() {
+      return this.color;
    }
 }
 

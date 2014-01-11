@@ -151,13 +151,14 @@ public class DrawingPanel extends JPanel implements Serializable {
               
               int leftCornerX = 50+i*step;
               int leftCornerY = 50;
-              imageGraphics.setColor(Color.BLUE);
+              imageGraphics.setColor(player[i].getColor());
               imageGraphics.drawRect(leftCornerX,leftCornerY,115,38);
               //ATH.paintIcon(this, imageGraphics, leftCornerX, leftCornerY);
               
               // we draw some Strings: the name of the player, and his score
-              imageGraphics.setColor(Color.WHITE);
+              //imageGraphics.setColor(Color.WHITE);
               imageGraphics.drawString(player[i].getName(), leftCornerX,leftCornerY);
+              //imageGraphics.setColor(Color.WHITE);
               imageGraphics.drawString("Total Score", leftCornerX+5,leftCornerY+16);
               String totalScore = Integer.toString(player[i].getTotalScore());
               imageGraphics.drawString(totalScore, leftCornerX+90,leftCornerY+16);

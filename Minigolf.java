@@ -125,11 +125,37 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          String num = Integer.toString(i+1);
          String name = JOptionPane.showInputDialog(null, 
          "Please choose a name for player " + num, "Player "+num, JOptionPane.INFORMATION_MESSAGE);
+         // color of the ball
+         Color color;
+         switch(i) {
+           case 0:
+             color = Color.WHITE;
+             break;
+           case 1:
+             color = Color.CYAN;
+             break;
+           case 2:
+             color = Color.MAGENTA;
+             break;
+           case 3:
+             color = Color.ORANGE;
+             break;
+           case 4:
+             color = Color.PINK;
+             break;
+           case 5:
+             color = Color.YELLOW;
+             break;
+           default:
+             color = Color.WHITE;
+             break;
+         }
          if ( name == null || name.equals("") )
-           player[i] = new Player(i, "Player " + Integer.toString(i+1));
+           player[i] = new Player(i, "Player " + Integer.toString(i+1), color);
          else
-           player[i] = new Player(i, name);
+           player[i] = new Player(i, name, color);
          System.out.println("New player: " + player[i].getName());
+         
        }
        panel.setPlayer(this.player);
        
@@ -164,7 +190,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          for (int i=0; i<numberOfPlayer; i++)
          {
            player[i].ball = world.addCircularObject(0.5f, BodyType.STATIC, 
-                            new Vec2(0, -10), 0, new Sprite("ballPlayer"+Integer.toString(i), 1, Color.WHITE, null));
+                            new Vec2(0, -10), 0, new Sprite("ballPlayer"+Integer.toString(i), 1, player[i].getColor(), null));
                             // or new ImageIcon("./img/golf_ball.png"))) instead of null
            // STATIC -> to prevent the ball from falling when set to sensor  
            player[i].ball.getFixtureList().setSensor(true);  // to prevent from colliding with other player's balls
