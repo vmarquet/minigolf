@@ -64,8 +64,12 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     public static void main(String[] args) {
        System.out.println("Welcome to Virtual Minigolf !");
        Minigolf golf = new Minigolf();
-       for(int i=1; i<3; i++)
+       for(int i=1; i<2; i++)  // i<3
          golf.playHole(i);
+       golf.showHighScores();
+       System.out.println("Bye-bye !");
+       System.exit(-1);
+       //golf.menu();  // in order to do that, there are a few changes to make to menu()
     }
     
     public void menu() {
@@ -262,6 +266,16 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
              
              frame.setTitle("Virtual Minigolf  [1280*720]  -  " + world.getLevelName() );
              
+             // sometimes, due to the physical engine, the ball can pass through walls if it go to quicky
+             // if it happens, we putt the ball at the beginning again (but the shot count for the player as a penalty)
+             if (currentPlayer.ball.getPosition().x < -65 || currentPlayer.ball.getPosition().x > 65
+             || currentPlayer.ball.getPosition().y > 75 || currentPlayer.ball.getPosition().y < 1 ) {
+                currentPlayer.isBallRolling = false;
+                currentPlayer.isBallSet = false;
+                this.nextPlayer();
+             }
+             //System.out.println( currentPlayer.ball.getPosition().y );
+             
              // we actualize ball.previousPos once per second
              if (tourDeBoucle == 60) {
                double ecart_x = (double)(currentPlayer.ball.getPosition().x - currentPlayer.getPreviousPos().x);
@@ -302,7 +316,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
             System.err.println(ex.getMessage());
         }
     }
-
+    
+    public void showHighScores() {
+       
+    }
+    
     
     /* Event when object are touching */
     public void beginContact(Contact contact) {
