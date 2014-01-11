@@ -34,7 +34,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     private DrawingPanel panel;
     private JFrame frame;
     
-    private int gameMode;  // 1 = menu; 2 = playing;  this flag is set in this.menu()
+    private int gameMode;  // 1 = menu; 2 = playing; 3 = high scores;  this flag is set in this.menu() and this.showHighScores
     private int numberOfPlayer;
     private int numberOfPlayerMax;
     private boolean isNumberOfPlayerSet;
@@ -318,7 +318,15 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
     
     public void showHighScores() {
+       gameMode = 3; panel.setGameMode(3);
+       panel.computeHighScore();
+       this.panel.updateUI();
        
+       boolean useless = true;
+       while(useless) {  }
+       
+       
+       gameMode = 1; panel.setGameMode(1); // if we want to return to the menu
     }
     
     

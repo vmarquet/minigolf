@@ -10,5 +10,7 @@ read -p "Enter the abscissea of the hole (if you don't want one, type "null"): "
 
 # if hole, draw the flag also
 
+# THIS SCRIPT IS NOT COMLETELY WRITTEN, DO NOT USE NOW
+
 
 exit 0

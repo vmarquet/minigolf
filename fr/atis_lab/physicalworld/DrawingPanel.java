@@ -24,6 +24,8 @@ public class DrawingPanel extends JPanel implements Serializable {
    private int gameMode;
    private int numberOfPlayer;
    public Player[] player;
+   private int[] highScores;
+   private String[] highScoresNames; 
    private Player currentPlayer;
    //public Minigolf minigolf;  // how to access Minigolf ? I don't know how to uses packages
    
@@ -123,7 +125,7 @@ public class DrawingPanel extends JPanel implements Serializable {
         // The painting of the DrawingPanel will be a crop of this image, centered around the camera
         BufferedImage buffer = new BufferedImage(toScale(world.getWidth()), toScale(world.getHeight()), BufferedImage.TYPE_INT_RGB);
      	  
-     	  // Get the Graphics context from the image (different from the Graphics context from the JPanel
+     	  // Get the Graphics context from the image (different from the Graphics context from the JPanel)
      	  Graphics imageGraphics = buffer.getGraphics();
      	  // Clear the image
         imageGraphics.clearRect(0, 0, buffer.getWidth(), buffer.getHeight());
@@ -199,6 +201,20 @@ public class DrawingPanel extends JPanel implements Serializable {
            imageGraphics.drawString(par, 660, 25);
         }
         
+        // high scores
+        if (this.gameMode == 3) {
+           int step = 30;
+           imageGraphics.setColor(Color.WHITE);
+           imageGraphics.drawString("This game's player's high scores", 300, 100);
+           imageGraphics.drawString("(the closest to 0, the better it is)", 300, 100+step);
+           for (int i=0; i<numberOfPlayer; i++) {
+             imageGraphics.drawString( Integer.toString(i+1) + ". " + highScoresNames[i] + 
+             ", score = " + Integer.toString(highScores[i]), 300, 100 + step*(i+2));
+           }
+           
+           
+        }
+        
         /* Painting the JPanel as a crop from the buffer image */
         // Clear the JPanel
         g.clearRect(0, 0, getWidth(), getHeight());
@@ -206,6 +222,7 @@ public class DrawingPanel extends JPanel implements Serializable {
         Point cam = convert4draw(cameraPosition);
         // Center the JPanel on the camera and print the buffer image in the JPanel
         g.drawImage(buffer, this.getWidth()/2 - cam.x, this.getHeight()/2 -cam.y , null);
+        
     }
     
     // functions added to customize the ATH:
@@ -220,6 +237,30 @@ public class DrawingPanel extends JPanel implements Serializable {
     public void setCurrentPlayer(Player currentPlayer) {
        this.currentPlayer = currentPlayer;
        return;
+    }
+    
+    public void computeHighScore() {  
+       this.highScores = new int[6];  // un peu sale parce que j'ai manqué de temps, à refaire proprement
+       this.highScoresNames = new String[6];
+       boolean[] tab = new boolean[numberOfPlayer];
+       for (int i=0; i<numberOfPlayer; i++)
+         tab[i] = false;  // we will put true when the player's score will be written in int[] highScores
+       for (int i=0; i<numberOfPlayer; i++) {
+         int jSave = -1;
+         int min = 255;  // the best score is the minimal score (closest to par)
+         for (int j=0; j<numberOfPlayer; j++) {
+           if (tab[j] == true)  // score already in int[] highScores so we skip
+             continue;
+           if (player[j].getTotalScore() < min ) {
+             min = player[j].getTotalScore();
+             jSave = j;
+           }
+         }
+         // now, we know who has the best score
+         highScores[i] = min;
+         highScoresNames[i] = player[jSave].getName();
+         tab[jSave] = true;
+       }
     }
 }
 
