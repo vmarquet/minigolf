@@ -39,8 +39,18 @@ public class Player
       hasFinishedHole = false;
       //reticule = new Panel();
    }
+
+   // to reset flags and score between holes
+   public void resetBetweenHoles() {
+      this.hasFinishedHole = false;
+      this.isBallRolling = false;
+      this.isBallSet = false;
+      this.resetLevelScore();
+      this.resetPower();
+      this.resetAngle();
+   }
    
-   public void resetAngle() {
+   private void resetAngle() {
       this.angle = 45;
    }
    public void increaseAngle() {
@@ -77,7 +87,7 @@ public class Player
    public int getPower() {
       return this.power;
    }
-   public void resetPower() {
+   private void resetPower() {
       this.power = 50;
    }
    public Vec2 getPreviousPos() {
@@ -103,7 +113,7 @@ public class Player
    public void addShot() {
       this.levelScore += 1;
    }
-   public void resetLevelScore() {
+   private void resetLevelScore() {
       this.levelScore = 0;
    }
    public Color getColor() {

@@ -7,6 +7,7 @@ import java.util.Scanner;
 import java.io.*;
 import org.jbox2d.common.*;
 import sources.*;
+import java.lang.Math;
 
 /**
  * Custom JPanel to paint the PhysicalWorld and its PhysicalObject <br/>
@@ -172,16 +173,17 @@ public class DrawingPanel extends JPanel implements Serializable {
               imageGraphics.drawString(levelScore, leftCornerX+90,leftCornerY+31);
               
            }
+
            // drawing of the power bar:
            imageGraphics.setColor(Color.BLUE);
-           imageGraphics.drawRect(30, 198, 30, 204);
-           if (currentPlayer.getPower() < 40)
-             imageGraphics.setColor(Color.GREEN);
-           else if (currentPlayer.getPower() < 75)
-             imageGraphics.setColor(Color.YELLOW);
-           else
-             imageGraphics.setColor(Color.RED);
-           imageGraphics.fillRect(32, 400-2*currentPlayer.getPower(), 26, 2*currentPlayer.getPower());
+           imageGraphics.drawRect(30, 197, 30, 204);
+
+           float power = ((float)(currentPlayer.getPower()))/100f; // between 0 and 1
+           float R, G, B=0;
+           R = Math.min(power*2, 1);
+           G = Math.min(2f-(power*2), 1);
+           imageGraphics.setColor(new Color(R,G,B));
+           imageGraphics.fillRect(33, 400-2*currentPlayer.getPower(), 26, 2*currentPlayer.getPower());
            
            // draw an icon to show whoose turn it is
            imageGraphics.setColor(Color.WHITE);

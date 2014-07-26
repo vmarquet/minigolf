@@ -1,8 +1,3 @@
-// idées pour les niveaux: pour simuler de l'eau, mettre des petites boules bleu très légères.
-// si la balle de golf tombe dedans, elle coule au fond et atteint un sensor 
-
-// gestion de l'effet ?
-
 import org.jbox2d.common.*;
 import org.jbox2d.dynamics.*;
 import org.jbox2d.collision.*;
@@ -18,9 +13,6 @@ import java.io.*;
 import fr.atis_lab.physicalworld.*;
 import sources.*;
 
-// Compilation:
-// javac -cp ./lib/*:. Minigolf.java
-// java  -cp ./lib/*:. Minigolf
 
 public class Minigolf implements KeyListener, ContactListener, Serializable {
 
@@ -173,12 +165,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        
        // we reset each player's flags for this hole
        for (int i=0; i<numberOfPlayer; i++) {
-         player[i].hasFinishedHole = false;
-         player[i].isBallRolling = false;
-         player[i].isBallSet = false;
-         player[i].resetLevelScore();
-         player[i].resetPower();
-         player[i].resetAngle();
+         player[i].resetBetweenHoles();
        }
        hasEverybodyFinishedHole = false;
        int par = 0;  // to avoid the "variable might not have been initialized" due to the try catch
