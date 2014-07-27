@@ -26,12 +26,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     private DrawingPanel panel;
     private JFrame frame;
     
-    private int gameMode;  // 1 = menu; 2 = playing; 3 = high scores;  this flag is set in this.menu() and this.showHighScores
-    private int numberOfPlayer;
-    private int numberOfPlayerMax;
+    private Model model;
+    private int gameMode;  // TODO: an enum
+    // 1 = menu; 2 = playing; 3 = high scores;  this flag is set in this.menu() and this.showHighScores
     private boolean isNumberOfPlayerSet;
     private Body[] menuball;
-    private Player[] player;
     private Player currentPlayer;  // pointer
     private Player previousPlayer; // pointer
     private int tourDeBoucle;
@@ -40,7 +39,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     private boolean updatePowerJauge;
 
     public Minigolf() {
-       this.numberOfPlayerMax = 6;
+       // we create the model
+       this.model = Model.getInstance();
+
        this.tourDeBoucle = 0;
        this.panel = new DrawingPanel(new Dimension(1280,720), 10f);
        frame = new JFrame("Virtual Minigolf  [1280*720]");
@@ -56,7 +57,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     public static void main(String[] args) {
        System.out.println("Welcome to Virtual Minigolf !");
        Minigolf golf = new Minigolf();
-       for(int i=1; i<3; i++)  // i<3
+       for(int i=1; i<4; i++)
          golf.playHole(i);
        golf.showHighScores();
        System.out.println("Bye-bye !");
@@ -70,8 +71,8 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        world = new PhysicalWorld(new Vec2(0,-9.81f), -64, 64, 0, 72, Color.WHITE);
        world.setContactListener(this);
        try {
-          menuball = new Body[numberOfPlayerMax];
-          for (int i=0; i<numberOfPlayerMax; i++) {
+          menuball = new Body[model.numberOfPlayerMax];
+          for (int i=0; i<model.numberOfPlayerMax; i++) {
             menuball[i] = world.addCircularObject(0.5f, BodyType.STATIC, new Vec2(13+2*i, -10), 0, 
                           new Sprite("menuball"+Integer.toString(i), 1, Color.WHITE, null));
                           // -10 because by default we want to hide the ball for players 2 3 4
@@ -94,7 +95,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        
        // we get the number of players
        isNumberOfPlayerSet = false;
-       numberOfPlayer = 1;  panel.setNumberOfPlayer(numberOfPlayer); // default value
+       model.numberOfPlayer = 1;  panel.setNumberOfPlayer(model.numberOfPlayer); // default value
        
        try {
          float timeStep = 1/60.0f;  // 60 FPS
@@ -114,9 +115,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        }
        
        // creation of an object Player for each player
-       System.out.println("You choose " + Integer.toString(numberOfPlayer) + " player(s)");
-       player = new Player[numberOfPlayer];
-       for (int i=0; i<numberOfPlayer; i++) {
+       System.out.println("You choose " + Integer.toString(model.numberOfPlayer) + " player(s)");
+       Player player;
+       for (int i=0; i<model.numberOfPlayer; i++) {
          // we display a popup to get the name of the player
          String num = Integer.toString(i+1);
          String name = JOptionPane.showInputDialog(null, 
@@ -147,13 +148,14 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
              break;
          }
          if ( name == null || name.equals("") )
-           player[i] = new Player(i, "Player " + Integer.toString(i+1), color);
+           player = new Player(i, "Player " + Integer.toString(i+1), color);
          else
-           player[i] = new Player(i, name, color);
-         System.out.println("New player: " + player[i].getName());
+           player = new Player(i, name, color);
+         System.out.println("New player: " + player.getName());
          
+         this.model.addPlayer(player);
        }
-       panel.setPlayer(this.player);
+       panel.setPlayer(model.getPlayers());
        
        gameMode = 2; panel.setGameMode(2);
        return;
@@ -164,8 +166,8 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        System.out.println("Playing hole number " + Integer.toString(n) );
        
        // we reset each player's flags for this hole
-       for (int i=0; i<numberOfPlayer; i++) {
-         player[i].resetBetweenHoles();
+       for (Player player : model.getPlayers()) {
+         player.resetBetweenHoles();
        }
        hasEverybodyFinishedHole = false;
        int par = 0;  // to avoid the "variable might not have been initialized" due to the try catch
@@ -178,20 +180,21 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        try {
          /* Allocation of the ball : radius of 3, position (0, 10), yellow, with an Image */
          /* PhysicalObject are automatically added to the PhysicalWorld */
-         for (int i=0; i<numberOfPlayer; i++)
+         for (Player player : model.getPlayers())
          {
-           player[i].ball = world.addCircularObject(0.5f, BodyType.STATIC, 
-                            new Vec2(0, -10), 0, new Sprite("ballPlayer"+Integer.toString(i), 1, player[i].getColor(), null));
+           int i = player.getNumber();
+           player.ball = world.addCircularObject(0.5f, BodyType.STATIC, 
+                            new Vec2(0, -10), 0, new Sprite("ballPlayer"+Integer.toString(i), 1, player.getColor(), null));
                             // or new ImageIcon("./img/golf_ball.png"))) instead of null
            // STATIC -> to prevent the ball from falling when set to sensor  
-           player[i].ball.getFixtureList().setSensor(true);  // to prevent from colliding with other player's balls
-           player[i].ball.getFixtureList().setRestitution(0.2f);  // bouncing propertie
-           player[i].ball.getFixtureList().setFriction(10000000000000f);  // friction propertie (adhérence)
+           player.ball.getFixtureList().setSensor(true);  // to prevent from colliding with other player's balls
+           player.ball.getFixtureList().setRestitution(0.2f);  // bouncing propertie
+           player.ball.getFixtureList().setFriction(10000000000000f);  // friction propertie (adhérence)
            // on peut aussi fixer la densité: density
-           player[i].ball.setAngularDamping(3); 
+           player.ball.setAngularDamping(3); 
          }
          // we prepair player[0] to play
-         currentPlayer = player[0];  panel.setCurrentPlayer(currentPlayer);
+         currentPlayer = model.getPlayerNumber(0);  panel.setCurrentPlayer(currentPlayer);
          currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
          currentPlayer.ball.getFixtureList().setSensor(false);
          currentPlayer.ball.setType(BodyType.DYNAMIC);
@@ -234,8 +237,8 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        
        this.run();
        
-       for (int i=0; i<numberOfPlayer; i++) {
-          player[i].updateTotalScore( player[i].getLevelScore() - par );
+       for (Player player : model.getPlayers()) {
+          player.updateTotalScore( player.getLevelScore() - par );
        }
     }
 
@@ -306,8 +309,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     
     public void showHighScores() {
        gameMode = 3; panel.setGameMode(3);
-       panel.getLocalHighScore();
-       panel.getGlobalHighScore();
+
+       HighScore.getLocalHighScore(panel);
+       HighScore.getGlobalHighScore(panel);
        this.panel.updateUI();
        
        boolean score = true;
@@ -335,11 +339,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
         // we check if all player have finished the hole
         // if yes, we change the flag:
         int m=0;
-        for (int i=0; i<numberOfPlayer; i++) {
-          if (player[i].hasFinishedHole == true)
+        for (Player player : model.getPlayers()) {
+          if (player.hasFinishedHole == true)
             m++;
         }
-        if (m==numberOfPlayer) {
+        if (m==model.numberOfPlayer) {
           hasEverybodyFinishedHole = true;
           System.out.println("Everybody has finished this hole");
         }
@@ -390,9 +394,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
             break;
          case KeyEvent.VK_RIGHT:
             if (gameMode == 1) {
-              if(numberOfPlayer < numberOfPlayerMax) {
-                numberOfPlayer++;  panel.setNumberOfPlayer(numberOfPlayer);
-                menuball[numberOfPlayer-1].setTransform(new Vec2(13+2*(numberOfPlayer-1),32), 0);
+              if(model.numberOfPlayer < model.numberOfPlayerMax) {
+                model.numberOfPlayer++;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                menuball[model.numberOfPlayer-1].setTransform(new Vec2(13+2*(model.numberOfPlayer-1),32), 0);
               }
             }
             if (gameMode == 2)
@@ -400,9 +404,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
             break;
          case KeyEvent.VK_LEFT:
             if (gameMode == 1) {
-              if(numberOfPlayer > 1) {
-                numberOfPlayer--;  panel.setNumberOfPlayer(numberOfPlayer);
-                menuball[numberOfPlayer].setTransform(new Vec2(0,-10), 0);
+              if(model.numberOfPlayer > 1) {
+                model.numberOfPlayer--;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                menuball[model.numberOfPlayer].setTransform(new Vec2(0,-10), 0);
               }
             }
             if (gameMode == 2)
@@ -410,9 +414,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
             break;
          case KeyEvent.VK_DOWN:
             if (gameMode == 1) {
-              if(numberOfPlayer > 1) {
-                numberOfPlayer--;  panel.setNumberOfPlayer(numberOfPlayer);
-                menuball[numberOfPlayer].setTransform(new Vec2(0,-10), 0);
+              if(model.numberOfPlayer > 1) {
+                model.numberOfPlayer--;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                menuball[model.numberOfPlayer].setTransform(new Vec2(0,-10), 0);
               }
             }
             if (gameMode == 2) {
@@ -421,9 +425,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
             break;
          case KeyEvent.VK_UP:
             if (gameMode == 1) {
-              if(numberOfPlayer < numberOfPlayerMax) {
-                numberOfPlayer++;  panel.setNumberOfPlayer(numberOfPlayer);
-                menuball[numberOfPlayer-1].setTransform(new Vec2(13+2*(numberOfPlayer-1),32), 0);
+              if(model.numberOfPlayer < model.numberOfPlayerMax) {
+                model.numberOfPlayer++;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                menuball[model.numberOfPlayer-1].setTransform(new Vec2(13+2*(model.numberOfPlayer-1),32), 0);
               }
             }
             if (gameMode == 2) {
@@ -444,16 +448,16 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        // we search for the next player
        int n = currentPlayer.number;
   	  	 do {
-  	  	   if (n == numberOfPlayer-1)
+  	  	   if (n == model.numberOfPlayer-1)
   	  	     n = 0;
   	  	   else
   	  	     n++;
   	  	   // to avoid infinite loop:
   	  	   if ( hasEverybodyFinishedHole == true )
   	  	     return;
-  	  	 } while ( player[n].hasFinishedHole == true );  // don't put currentPlayer instead of player[n] !!!
+  	  	 } while ( model.getPlayerNumber(n).hasFinishedHole == true );  // don't put currentPlayer instead of player[n] !!!
   	  	 // here, we can actualize current player
-  	  	 currentPlayer = player[n];  panel.setCurrentPlayer(currentPlayer);
+  	  	 currentPlayer = model.getPlayerNumber(n);  panel.setCurrentPlayer(currentPlayer);
   	  	 // we prepair him to play 
 	  	   currentPlayer.ball.getFixtureList().setSensor(false);
 	  	   currentPlayer.ball.setType(BodyType.DYNAMIC);

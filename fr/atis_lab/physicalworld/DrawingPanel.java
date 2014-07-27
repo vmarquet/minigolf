@@ -8,6 +8,8 @@ import java.io.*;
 import org.jbox2d.common.*;
 import sources.*;
 import java.lang.Math;
+import java.util.ArrayList;
+import sources.Model;
 
 /**
  * Custom JPanel to paint the PhysicalWorld and its PhysicalObject <br/>
@@ -25,13 +27,14 @@ public class DrawingPanel extends JPanel implements Serializable {
    // this is dirty but I can't find another way, I did not succeed in painting to the window outside of this class
    private int gameMode;
    private int numberOfPlayer;
-   public Player[] player;
-   private int[] localHighScores;
-   private String[] localHighScoresNames; 
-   private int[] globalHighScores;
-   private String[] globalHighScoresNames; 
+   public ArrayList<Player> player;
+   public int[] localHighScores;
+   public String[] localHighScoresNames; 
+   public int[] globalHighScores;
+   public String[] globalHighScoresNames; 
    private Player currentPlayer;
    //public Minigolf minigolf;  // how to access Minigolf ? I don't know how to uses packages
+   private Model model;
    
    private float scale;
    private PhysicalWorld world;
@@ -53,6 +56,8 @@ public class DrawingPanel extends JPanel implements Serializable {
       this.setPreferredSize(dimension);
       // The cameraPosition in the simulation referential
       this.cameraPosition = new Vec2(0,0);
+
+      this.model = Model.getInstance();
     }
     
     public DrawingPanel(Dimension dimension, float scale) {
@@ -62,14 +67,16 @@ public class DrawingPanel extends JPanel implements Serializable {
       this.setPreferredSize(dimension);
       // The cameraPosition in the simulation referential
       this.cameraPosition = new Vec2(0,0);
+
+      this.model = Model.getInstance();
     }
     
     public void setPhysicalWorld(PhysicalWorld world) {
       this.world = world;
     } 
-    public void setPlayer(Player[] player) {
+    public void setPlayer(ArrayList<Player> player) {
       this.player = player;
-      this.currentPlayer = player[0];
+      this.currentPlayer = model.getPlayerNumber(0);
     }
    
     
@@ -153,23 +160,24 @@ public class DrawingPanel extends JPanel implements Serializable {
         
            //ImageIcon ATH = new ImageIcon("./img/ATH2.png");
            int step = 140;  // space in pixels between player's HUD
-           for (int i=0; i<this.numberOfPlayer; i++) {
+           for (Player player : model.getPlayers()) {
+              int i = player.getNumber();
               
               int leftCornerX = 50+i*step;
               int leftCornerY = 50;
-              imageGraphics.setColor(player[i].getColor());
+              imageGraphics.setColor(player.getColor());
               imageGraphics.drawRect(leftCornerX,leftCornerY,115,38);
               //ATH.paintIcon(this, imageGraphics, leftCornerX, leftCornerY);
               
               // we draw some Strings: the name of the player, and his score
               //imageGraphics.setColor(Color.WHITE);
-              imageGraphics.drawString(player[i].getName(), leftCornerX,leftCornerY);
+              imageGraphics.drawString(player.getName(), leftCornerX,leftCornerY);
               //imageGraphics.setColor(Color.WHITE);
               imageGraphics.drawString("Total Score", leftCornerX+5,leftCornerY+16);
-              String totalScore = Integer.toString(player[i].getTotalScore());
+              String totalScore = Integer.toString(player.getTotalScore());
               imageGraphics.drawString(totalScore, leftCornerX+90,leftCornerY+16);
               imageGraphics.drawString("Level Score", leftCornerX+5,leftCornerY+31);
-              String levelScore = Integer.toString(player[i].getLevelScore());
+              String levelScore = Integer.toString(player.getLevelScore());
               imageGraphics.drawString(levelScore, leftCornerX+90,leftCornerY+31);
               
            }
@@ -251,71 +259,6 @@ public class DrawingPanel extends JPanel implements Serializable {
        return;
     }
     
-    public void getLocalHighScore() {  
-       this.localHighScores = new int[6];  // un peu sale parce que j'ai manqué de temps, à refaire proprement
-       this.localHighScoresNames = new String[6];
-       boolean[] tab = new boolean[numberOfPlayer];
-       for (int i=0; i<numberOfPlayer; i++)
-         tab[i] = false;  // we will put true when the player's score will be written in int[] highScores
-       for (int i=0; i<numberOfPlayer; i++) {
-         int jSave = -1;
-         int min = 255;  // the best score is the minimal score (closest to par)
-         for (int j=0; j<numberOfPlayer; j++) {
-           if (tab[j] == true)  // score already in int[] highScores so we skip
-             continue;
-           if (player[j].getTotalScore() < min ) {
-             min = player[j].getTotalScore();
-             jSave = j;
-           }
-         }
-         // now, we know who has the best score
-         localHighScores[i] = min;
-         localHighScoresNames[i] = player[jSave].getName();
-         tab[jSave] = true;
-       }
-    }
-    public void getGlobalHighScore() {
-       this.globalHighScores = new int[10];  // un peu sale parce que j'ai manqué de temps, à refaire proprement
-       this.globalHighScoresNames = new String[10];
-       try {
-          FileReader file = new FileReader("./.score.txt");
-          Scanner in = new Scanner(file);
-          int j=0;
-          for (int i=0; i<10; i++) {  // we keep 10 best scores
-            String line = in.nextLine();
-            String[] tab = line.split(":");
-            while (localHighScores[j] < Integer.parseInt(tab[1]) && j<numberOfPlayer) {  // si on a un score local meilleur
-              globalHighScoresNames[i] = localHighScoresNames[j];
-              globalHighScores[i] = localHighScores[j];
-              i++; j++;
-            }
-            if (i<10) {  // si on n'a pas atteint les 10 noms
-              globalHighScoresNames[i] = tab[0];
-              globalHighScores[i] = Integer.parseInt(tab[1]);
-            }
-          }
-          in.close();
-       }
-       catch (FileNotFoundException e) {
-          System.out.println(e.getMessage());
-          System.out.println("file ./.score.txt not found");
-          System.exit(-1);
-       }
-       
-       
-       // we record the high scores in the file:
-       try {
-          PrintWriter out = new PrintWriter("./.score.txt", "UTF-8");
-          for (int i=0; i<10; i++) {
-             out.println(globalHighScoresNames[i] + ":" + globalHighScores[i]);
-          }
-          out.close();
-       }
-       catch (IOException e) {
-          System.out.println(e.getMessage());
-          System.exit(-1);
-       }
-    }
 }
 
 

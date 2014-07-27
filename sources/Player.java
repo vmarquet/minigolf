@@ -119,6 +119,9 @@ public class Player
    public Color getColor() {
       return this.color;
    }
+   public int getNumber() {
+      return this.number;
+   }
 }
 
 
