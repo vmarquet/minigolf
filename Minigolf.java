@@ -19,25 +19,19 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     /* PhysicalWorld => contains the World and walls (as PhysicalObject) */
     private PhysicalWorld world;
     /* PhysicalObject => contains the Body, Shape & Fixture */
-    transient private Body blob, pointer;  // blob is a temporary pointer
-    LinkedList<Vec2> powerJaugeVariable;
+    transient private Body pointer;
     
     /* Custom Panel for drawing purpose */
     private DrawingPanel panel;
     private JFrame frame;
     
     private Model model;
-    private int gameMode;  // TODO: an enum
-    // 1 = menu; 2 = playing; 3 = high scores;  this flag is set in this.menu() and this.showHighScores
     private boolean isNumberOfPlayerSet;
     private Body[] menuball;
-    private Player currentPlayer;  // pointer
     private Player previousPlayer; // pointer
     private int tourDeBoucle;
     private boolean hasEverybodyFinishedHole;  // updated in beginContact
     
-    private boolean updatePowerJauge;
-
     public Minigolf() {
        // we create the model
        this.model = Model.getInstance();
@@ -66,7 +60,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
     
     public void menu() {
-       gameMode = 1; panel.setGameMode(1);
+       model.gameMode = 1;
        // we create a temporary world just to do the background of the titlescreen
        world = new PhysicalWorld(new Vec2(0,-9.81f), -64, 64, 0, 72, Color.WHITE);
        world.setContactListener(this);
@@ -95,10 +89,10 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        
        // we get the number of players
        isNumberOfPlayerSet = false;
-       model.numberOfPlayer = 1;  panel.setNumberOfPlayer(model.numberOfPlayer); // default value
+       model.numberOfPlayer = 1; // default value
        
        try {
-         float timeStep = 1/60.0f;  // 60 FPS
+         float timeStep = 1/(float)(model.FPS);
          int msSleep = Math.round(1000*timeStep); // timeStep in milliseconds
          world.setTimeStep(timeStep); // Set the timeStep of the PhysicalWorld
          
@@ -155,9 +149,8 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          
          this.model.addPlayer(player);
        }
-       panel.setPlayer(model.getPlayers());
        
-       gameMode = 2; panel.setGameMode(2);
+       model.gameMode = 2;
        return;
     }
        
@@ -194,11 +187,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
            player.ball.setAngularDamping(3); 
          }
          // we prepair player[0] to play
-         currentPlayer = model.getPlayerNumber(0);  panel.setCurrentPlayer(currentPlayer);
-         currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
-         currentPlayer.ball.getFixtureList().setSensor(false);
-         currentPlayer.ball.setType(BodyType.DYNAMIC);
-         currentPlayer.isBallSet = true;
+         model.currentPlayer = model.getPlayerNumber(0);
+         model.currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
+         model.currentPlayer.ball.getFixtureList().setSensor(false);
+         model.currentPlayer.ball.setType(BodyType.DYNAMIC);
+         model.currentPlayer.isBallSet = true;
          
          // we read the .txt file which contain the configuration of the hole:
          HoleGenerator hg = new HoleGenerator(n, world);
@@ -246,7 +239,7 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     public void run() {
     		//System.out.println("You may use the arrows of the keyboard !");
         try {
-          float timeStep = 1/60.0f;  // 60 FPS
+          float timeStep = 1/(float)(model.FPS);
           int msSleep = Math.round(1000*timeStep); // timeStep in milliseconds
           world.setTimeStep(timeStep); // Set the timeStep of the PhysicalWorld
           
@@ -258,37 +251,37 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
              
              // sometimes, due to the physical engine, the ball can pass through walls if it go to quicky
              // if it happens, we putt the ball at the beginning again (but the shot count for the player as a penalty)
-             if (currentPlayer.ball.getPosition().x < -65 || currentPlayer.ball.getPosition().x > 65
-             || currentPlayer.ball.getPosition().y > 75 || currentPlayer.ball.getPosition().y < 1 ) {
-                currentPlayer.isBallRolling = false;
-                currentPlayer.isBallSet = false;
+             if (model.currentPlayer.ball.getPosition().x < -65 || model.currentPlayer.ball.getPosition().x > 65
+             || model.currentPlayer.ball.getPosition().y > 75 || model.currentPlayer.ball.getPosition().y < 1 ) {
+                model.currentPlayer.isBallRolling = false;
+                model.currentPlayer.isBallSet = false;
                 this.nextPlayer();
              }
-             //System.out.println( currentPlayer.ball.getPosition().y );
+             //System.out.println( model.currentPlayer.ball.getPosition().y );
              
              // we actualize ball.previousPos once per second
              if (tourDeBoucle == 60) {
-               double ecart_x = (double)(currentPlayer.ball.getPosition().x - currentPlayer.getPreviousPos().x);
-               double ecart_y = (double)(currentPlayer.ball.getPosition().y - currentPlayer.getPreviousPos().y);
+               double ecart_x = (double)(model.currentPlayer.ball.getPosition().x - model.currentPlayer.getPreviousPos().x);
+               double ecart_y = (double)(model.currentPlayer.ball.getPosition().y - model.currentPlayer.getPreviousPos().y);
                double dist = java.lang.Math.sqrt((double)ecart_x*(double)ecart_x + ecart_y*ecart_y);
                
                // we check if the ball has stopped or nearly, and next player
-               if (dist < 0.1 && currentPlayer.isBallRolling==true) {  // if the ball is nearly stopped
-                  currentPlayer.ball.setLinearVelocity(new Vec2(0,0));  // we stop completely the ball
+               if (dist < 0.1 && model.currentPlayer.isBallRolling==true) {  // if the ball is nearly stopped
+                  model.currentPlayer.ball.setLinearVelocity(new Vec2(0,0));  // we stop completely the ball
                   // we search for the next player, we skip those who already finished the hole
              	  	 this.nextPlayer();
              	  	 
                }
-               currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // don't change this line, else dist never < 0.1 !!
+               model.currentPlayer.setPreviousPos(model.currentPlayer.ball.getPosition());  // don't change this line, else dist never < 0.1 !!
                tourDeBoucle = 0;
              }
              tourDeBoucle++;
           
              // we check if we have to draw the pointer which show the angle
-             if ( currentPlayer.isBallRolling == false ) {
-                Vec2 ball_pos = currentPlayer.ball.getPosition();
-                double cos = java.lang.Math.cos((double)currentPlayer.getAngleRadian());
-           	    double sin = java.lang.Math.sin((double)currentPlayer.getAngleRadian());
+             if ( model.currentPlayer.isBallRolling == false ) {
+                Vec2 ball_pos = model.currentPlayer.ball.getPosition();
+                double cos = java.lang.Math.cos((double)model.currentPlayer.getAngleRadian());
+           	    double sin = java.lang.Math.sin((double)model.currentPlayer.getAngleRadian());
                 Vec2 pointer_pos = ball_pos.add(new Vec2((int)(10*cos), (int)(10*sin)));
                 pointer.setTransform(pointer_pos, 0);
              }
@@ -308,30 +301,29 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
     
     public void showHighScores() {
-       gameMode = 3; panel.setGameMode(3);
+       model.gameMode = 3;
 
-       HighScore.getLocalHighScore(panel);
-       HighScore.getGlobalHighScore(panel);
+       HighScore.getLocalHighScore();
+       HighScore.getGlobalHighScore();
        this.panel.updateUI();
        
        boolean score = true;
        while(score) {  }
        
-       
-       gameMode = 1; panel.setGameMode(1); // if we want to return to the menu (in a future version)
+       model.gameMode = 1;  // for now, returning to the menu after the game doesn't work
     }
     
     
     /* Event when object are touching */
     public void beginContact(Contact contact) {
-        int n = currentPlayer.number;
+        int n = model.currentPlayer.number;
         //if current player's ball touch the ground of the hole:
         if ( ( Sprite.extractSprite(contact.getFixtureA().getBody()).getName().equals("ballPlayer"+Integer.toString(n)) &&
            Sprite.extractSprite(contact.getFixtureB().getBody()).getName().equals("holeSensor") ) ||
            ( Sprite.extractSprite(contact.getFixtureB().getBody()).getName().equals("ballPlayer"+Integer.toString(n)) &&
            Sprite.extractSprite(contact.getFixtureA().getBody()).getName().equals("holeSensor") ) ) {
-              currentPlayer.hasFinishedHole = true;
-              System.out.println(currentPlayer.getName() + " has finished");
+              model.currentPlayer.hasFinishedHole = true;
+              System.out.println(model.currentPlayer.getName() + " has finished");
               //this.nextPlayer();  // useless if it's the last player to finish the hole
               // WARNING: the if(dist<0.1 ...) code is not read, maybe it's why there is a bug 
         }
@@ -375,63 +367,63 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          	 	}
             break;
          case KeyEvent.VK_ENTER:
-            if (gameMode == 1)
+            if (model.gameMode == 1)
               isNumberOfPlayerSet = true;
             break;
          case KeyEvent.VK_SPACE:
-            if (gameMode == 2) {
-           	  if( !currentPlayer.isBallRolling ) {
+            if (model.gameMode == 2) {
+           	  if( !model.currentPlayer.isBallRolling ) {
            	    // we apply the force to the ball
-           	    double cos = java.lang.Math.cos((double)currentPlayer.getAngleRadian());
-           	    double sin = java.lang.Math.sin((double)currentPlayer.getAngleRadian());
-           	    int power = currentPlayer.getPower();
-           	  	 currentPlayer.ball.applyForceToCenter(new Vec2((int)(3*power*cos),(int)(3*power*sin))); // en Newton
-           	  	 currentPlayer.isBallRolling = true;
-           	  	 System.out.println(currentPlayer.getName() + " shot");
-           	  	 currentPlayer.addShot();
+           	    double cos = java.lang.Math.cos((double)model.currentPlayer.getAngleRadian());
+           	    double sin = java.lang.Math.sin((double)model.currentPlayer.getAngleRadian());
+           	    int power = model.currentPlayer.getPower();
+           	  	 model.currentPlayer.ball.applyForceToCenter(new Vec2((int)(3*power*cos),(int)(3*power*sin))); // en Newton
+           	  	 model.currentPlayer.isBallRolling = true;
+           	  	 System.out.println(model.currentPlayer.getName() + " shot");
+           	  	 model.currentPlayer.addShot();
            	  }
          	  }
             break;
          case KeyEvent.VK_RIGHT:
-            if (gameMode == 1) {
+            if (model.gameMode == 1) {
               if(model.numberOfPlayer < model.numberOfPlayerMax) {
-                model.numberOfPlayer++;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                model.numberOfPlayer++;
                 menuball[model.numberOfPlayer-1].setTransform(new Vec2(13+2*(model.numberOfPlayer-1),32), 0);
               }
             }
-            if (gameMode == 2)
-         	    currentPlayer.decreaseAngle();
+            if (model.gameMode == 2)
+         	    model.currentPlayer.decreaseAngle();
             break;
          case KeyEvent.VK_LEFT:
-            if (gameMode == 1) {
+            if (model.gameMode == 1) {
               if(model.numberOfPlayer > 1) {
-                model.numberOfPlayer--;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                model.numberOfPlayer--;
                 menuball[model.numberOfPlayer].setTransform(new Vec2(0,-10), 0);
               }
             }
-            if (gameMode == 2)
-         	    currentPlayer.increaseAngle();
+            if (model.gameMode == 2)
+         	    model.currentPlayer.increaseAngle();
             break;
          case KeyEvent.VK_DOWN:
-            if (gameMode == 1) {
+            if (model.gameMode == 1) {
               if(model.numberOfPlayer > 1) {
-                model.numberOfPlayer--;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                model.numberOfPlayer--;
                 menuball[model.numberOfPlayer].setTransform(new Vec2(0,-10), 0);
               }
             }
-            if (gameMode == 2) {
-           	  currentPlayer.decreasePower();
+            if (model.gameMode == 2) {
+           	  model.currentPlayer.decreasePower();
            	}
             break;
          case KeyEvent.VK_UP:
-            if (gameMode == 1) {
+            if (model.gameMode == 1) {
               if(model.numberOfPlayer < model.numberOfPlayerMax) {
-                model.numberOfPlayer++;  panel.setNumberOfPlayer(model.numberOfPlayer);
+                model.numberOfPlayer++;
                 menuball[model.numberOfPlayer-1].setTransform(new Vec2(13+2*(model.numberOfPlayer-1),32), 0);
               }
             }
-            if (gameMode == 2) {
-           	  currentPlayer.increasePower();
+            if (model.gameMode == 2) {
+           	  model.currentPlayer.increasePower();
            	}
             break;
        }
@@ -442,11 +434,11 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     }
     private void nextPlayer() {  // change the current player to the next who hasn't finished the hole
        // operations on the ball
-       currentPlayer.ball.setType(BodyType.STATIC); // we set to static, else the ball will fall when we set it to sensor
-       currentPlayer.ball.getFixtureList().setSensor(true); // we set to sensor to avoid collisions with other balls
-       currentPlayer.isBallRolling = false;
+       model.currentPlayer.ball.setType(BodyType.STATIC); // we set to static, else the ball will fall when we set it to sensor
+       model.currentPlayer.ball.getFixtureList().setSensor(true); // we set to sensor to avoid collisions with other balls
+       model.currentPlayer.isBallRolling = false;
        // we search for the next player
-       int n = currentPlayer.number;
+       int n = model.currentPlayer.number;
   	  	 do {
   	  	   if (n == model.numberOfPlayer-1)
   	  	     n = 0;
@@ -457,16 +449,16 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
   	  	     return;
   	  	 } while ( model.getPlayerNumber(n).hasFinishedHole == true );  // don't put currentPlayer instead of player[n] !!!
   	  	 // here, we can actualize current player
-  	  	 currentPlayer = model.getPlayerNumber(n);  panel.setCurrentPlayer(currentPlayer);
+  	  	 model.currentPlayer = model.getPlayerNumber(n);
   	  	 // we prepair him to play 
-	  	   currentPlayer.ball.getFixtureList().setSensor(false);
-	  	   currentPlayer.ball.setType(BodyType.DYNAMIC);
-  	  	 System.out.println("Now it's the turn of " + currentPlayer.getName() );
-  	  	 if ( ! currentPlayer.isBallSet ) { // if it's the player first shot, we put the ball at the beginning of the hole
-  	  	   currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
-  	  	   currentPlayer.isBallSet = true;
+	  	   model.currentPlayer.ball.getFixtureList().setSensor(false);
+	  	   model.currentPlayer.ball.setType(BodyType.DYNAMIC);
+  	  	 System.out.println("Now it's the turn of " + model.currentPlayer.getName() );
+  	  	 if ( ! model.currentPlayer.isBallSet ) { // if it's the player first shot, we put the ball at the beginning of the hole
+  	  	   model.currentPlayer.ball.setTransform(new Vec2(-50,8), 0);
+  	  	   model.currentPlayer.isBallSet = true;
   	  	 }
-  	  	 currentPlayer.setPreviousPos(currentPlayer.ball.getPosition());  // new player, so we must actualize coord of the ball
+  	  	 model.currentPlayer.setPreviousPos(model.currentPlayer.ball.getPosition());  // new player, so we must actualize coord of the ball
     }
 }
 

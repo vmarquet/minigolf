@@ -1,19 +1,23 @@
 package sources;
 
-import fr.atis_lab.physicalworld.DrawingPanel;
 import java.util.Scanner;
 import java.io.*;
 
 public class HighScore
 {
 	public HighScore() {}
+
+	public static int[] localHighScores;
+	public static String[] localHighScoresNames; 
+	public static int[] globalHighScores;
+	public static String[] globalHighScoresNames; 
 	
 	// un peu sale parce que j'ai manqué de temps, à refaire proprement
-	public static void getLocalHighScore(DrawingPanel panel) {
+	public static void getLocalHighScore() {
 		Model model = Model.getInstance();
 
-		panel.localHighScores = new int[6];
-		panel.localHighScoresNames = new String[6];
+		localHighScores = new int[6];
+		localHighScoresNames = new String[6];
 		boolean[] tab = new boolean[model.numberOfPlayer];
 		for (int i=0; i<model.numberOfPlayer; i++)
 			tab[i] = false;  // we will put true when the player's score will be written in int[] highScores
@@ -29,18 +33,18 @@ public class HighScore
 				}
 			}
 			// now, we know who has the best score
-			panel.localHighScores[i] = min;
-			panel.localHighScoresNames[i] = model.getPlayerNumber(jSave).getName();
+			localHighScores[i] = min;
+			localHighScoresNames[i] = model.getPlayerNumber(jSave).getName();
 			tab[jSave] = true;
 		}
 	}
 
 	// un peu sale parce que j'ai manqué de temps, à refaire proprement
-	public static void getGlobalHighScore(DrawingPanel panel) {
+	public static void getGlobalHighScore() {
 		Model model = Model.getInstance();
 
-		panel.globalHighScores = new int[10];
-		panel.globalHighScoresNames = new String[10];
+		globalHighScores = new int[10];
+		globalHighScoresNames = new String[10];
 		try {
 			FileReader file = new FileReader("./.score.txt");
 			Scanner in = new Scanner(file);
@@ -48,14 +52,14 @@ public class HighScore
 			for (int i=0; i<10; i++) {  // we keep 10 best scores
 				String line = in.nextLine();
 				String[] tab = line.split(":");
-				while (panel.localHighScores[j] < Integer.parseInt(tab[1]) && j<model.numberOfPlayer) {  // si on a un score local meilleur
-					panel.globalHighScoresNames[i] = panel.localHighScoresNames[j];
-					panel.globalHighScores[i] = panel.localHighScores[j];
+				while (localHighScores[j] < Integer.parseInt(tab[1]) && j<model.numberOfPlayer) {  // si on a un score local meilleur
+					globalHighScoresNames[i] = localHighScoresNames[j];
+					globalHighScores[i] = localHighScores[j];
 					i++; j++;
 				}
 				if (i<10) {  // si on n'a pas atteint les 10 noms
-					panel.globalHighScoresNames[i] = tab[0];
-					panel.globalHighScores[i] = Integer.parseInt(tab[1]);
+					globalHighScoresNames[i] = tab[0];
+					globalHighScores[i] = Integer.parseInt(tab[1]);
 				}
 			}
 			in.close();
@@ -70,7 +74,7 @@ public class HighScore
 		try {
 			PrintWriter out = new PrintWriter("./.score.txt", "UTF-8");
 			for (int i=0; i<10; i++) {
-				out.println(panel.globalHighScoresNames[i] + ":" + panel.globalHighScores[i]);
+				out.println(globalHighScoresNames[i] + ":" + globalHighScores[i]);
 			}
 			out.close();
 		}

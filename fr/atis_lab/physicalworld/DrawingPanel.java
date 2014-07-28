@@ -10,6 +10,7 @@ import sources.*;
 import java.lang.Math;
 import java.util.ArrayList;
 import sources.Model;
+import sources.HighScore;
 
 /**
  * Custom JPanel to paint the PhysicalWorld and its PhysicalObject <br/>
@@ -20,20 +21,6 @@ import sources.Model;
  */
 public class DrawingPanel extends JPanel implements Serializable {
        
-   // because for HUD drawing purpose, we need to have access to flags gameMode, numberOfPlayer, ...
-   // HUD = Head On Display: each player's score, ... 
-   // we can't access directly the class miniglf's variables because of linking problems I can't resolve
-   // so I make a copy of the class Minigolf variables
-   // this is dirty but I can't find another way, I did not succeed in painting to the window outside of this class
-   private int gameMode;
-   private int numberOfPlayer;
-   public ArrayList<Player> player;
-   public int[] localHighScores;
-   public String[] localHighScoresNames; 
-   public int[] globalHighScores;
-   public String[] globalHighScoresNames; 
-   private Player currentPlayer;
-   //public Minigolf minigolf;  // how to access Minigolf ? I don't know how to uses packages
    private Model model;
    
    private float scale;
@@ -74,12 +61,7 @@ public class DrawingPanel extends JPanel implements Serializable {
     public void setPhysicalWorld(PhysicalWorld world) {
       this.world = world;
     } 
-    public void setPlayer(ArrayList<Player> player) {
-      this.player = player;
-      this.currentPlayer = model.getPlayerNumber(0);
-    }
    
-    
     
     /**
      * Set the camera position (in the simulation referential)
@@ -154,9 +136,9 @@ public class DrawingPanel extends JPanel implements Serializable {
         	 world.paint(imageGraphics, this);
         	 // world.paint appelle Sprite.paint() sur tous les sprites du tableau de sprites
         }
-        
+
         // HUD DRAWING
-        if (this.gameMode == 2) {
+        if (model.gameMode == 2) {
         
            //ImageIcon ATH = new ImageIcon("./img/ATH2.png");
            int step = 140;  // space in pixels between player's HUD
@@ -186,16 +168,16 @@ public class DrawingPanel extends JPanel implements Serializable {
            imageGraphics.setColor(Color.BLUE);
            imageGraphics.drawRect(30, 197, 30, 204);
 
-           float power = ((float)(currentPlayer.getPower()))/100f; // between 0 and 1
+           float power = ((float)(model.currentPlayer.getPower()))/100f; // between 0 and 1
            float R, G, B=0;
            R = Math.min(power*2, 1);
            G = Math.min(2f-(power*2), 1);
            imageGraphics.setColor(new Color(R,G,B));
-           imageGraphics.fillRect(33, 400-2*currentPlayer.getPower(), 26, 2*currentPlayer.getPower());
+           imageGraphics.fillRect(33, 400-2*model.currentPlayer.getPower(), 26, 2*model.currentPlayer.getPower());
            
            // draw an icon to show whoose turn it is
            imageGraphics.setColor(Color.WHITE);
-           int var = currentPlayer.number*step;
+           int var = model.currentPlayer.number*step;
            // if we want the symbol to be a ball:
            //imageGraphics.drawOval(40+var, 64, 10,10);
            // if we want the symbol to be a triangle:
@@ -215,22 +197,22 @@ public class DrawingPanel extends JPanel implements Serializable {
         }
         
         // high scores
-        if (this.gameMode == 3) {
+        if (model.gameMode == 3) {
            int step = 30;
            imageGraphics.setColor(Color.WHITE);
            imageGraphics.drawString("This game's player's high scores", 300, 100);
            //imageGraphics.drawString("(the closest to 0, the better it is)", 300, 100+step);
-           for (int i=0; i<numberOfPlayer; i++) {
-             imageGraphics.drawString( Integer.toString(i+1) + ". " + localHighScoresNames[i] + 
-             ", score = " + Integer.toString(localHighScores[i]), 300, 100 + step*(i+2));
+           for (int i=0; i<model.numberOfPlayer; i++) {
+             imageGraphics.drawString( Integer.toString(i+1) + ". " + HighScore.localHighScoresNames[i] + 
+             ", score = " + Integer.toString(HighScore.localHighScores[i]), 300, 100 + step*(i+2));
            }
            
            imageGraphics.setColor(Color.WHITE);
            imageGraphics.drawString("Global player's high scores", 700, 100);
            //imageGraphics.drawString("(the closest to 0, the better it is)", 300, 100+step);
            for (int i=0; i<10; i++) {
-             imageGraphics.drawString( Integer.toString(i+1) + ". " + globalHighScoresNames[i] + 
-             ", score = " + Integer.toString(globalHighScores[i]), 700, 100 + step*(i+2));
+             imageGraphics.drawString( Integer.toString(i+1) + ". " + HighScore.globalHighScoresNames[i] + 
+             ", score = " + Integer.toString(HighScore.globalHighScores[i]), 700, 100 + step*(i+2));
            }
            
         }
@@ -243,20 +225,6 @@ public class DrawingPanel extends JPanel implements Serializable {
         // Center the JPanel on the camera and print the buffer image in the JPanel
         g.drawImage(buffer, this.getWidth()/2 - cam.x, this.getHeight()/2 -cam.y , null);
         
-    }
-    
-    // functions added to customize the ATH:
-    public void setGameMode(int gameMode) {
-       this.gameMode = gameMode;
-       return;
-    }
-    public void setNumberOfPlayer(int numberOfPlayer) {
-       this.numberOfPlayer = numberOfPlayer;
-       return;
-    }
-    public void setCurrentPlayer(Player currentPlayer) {
-       this.currentPlayer = currentPlayer;
-       return;
     }
     
 }

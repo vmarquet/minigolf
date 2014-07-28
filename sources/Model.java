@@ -20,9 +20,13 @@ public class Model
 	}
 	// --------------------------------
 
+	public int gameMode;  // TODO: an enum
+    // 1 = menu; 2 = playing; 3 = high scores;  this flag is set in this.menu() and this.showHighScores
 	private ArrayList<Player> players;
+	public Player currentPlayer;  // pointer
 	public final int numberOfPlayerMax = 6;
 	public int numberOfPlayer;
+	public final int FPS = 60;
 
 	public int getNumberOfPlayers() {
 		return this.players.size();
