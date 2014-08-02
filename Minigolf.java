@@ -19,7 +19,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     /* PhysicalWorld => contains the World and walls (as PhysicalObject) */
     private PhysicalWorld world;
     /* PhysicalObject => contains the Body, Shape & Fixture */
-    transient private Body pointer;
     
     /* Custom Panel for drawing purpose */
     private DrawingPanel panel;
@@ -28,7 +27,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     private Model model;
     private boolean isNumberOfPlayerSet;
     private Body[] menuball;
-    private Player previousPlayer; // pointer
     private int tourDeBoucle;
     private boolean hasEverybodyFinishedHole;  // updated in beginContact
     
@@ -197,13 +195,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
          HoleGenerator hg = new HoleGenerator(n, world);
          par = world.getPar();
          
-
-         // affichage du pointeur de tir
-         pointer = world.addCircularObject(0.2f, BodyType.STATIC, new Vec2(-50, 10), 0, 
-                   new Sprite("pointer", 1, Color.RED, new ImageIcon("./img/pointer.png")));
-         pointer.getFixtureList().setSensor(true);
-
-
        } catch (InvalidSpriteNameException ex) {
            ex.printStackTrace();
            System.exit(-1);
@@ -223,10 +214,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        this.frame.pack();
        this.frame.setVisible(true);
        this.panel.requestFocus();	  // must be last line
-       
-       /* POUR L'ATH: MARCHE A PEU PRES MAIS TRES MOCHE (BARRE GRISE EN HAUT)
-       JLabel test1 = new JLabel("My text");
-       frame.add(test1, BorderLayout.PAGE_START); */
        
        this.run();
        
@@ -277,18 +264,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
              }
              tourDeBoucle++;
           
-             // we check if we have to draw the pointer which show the angle
-             if ( model.currentPlayer.isBallRolling == false ) {
-                Vec2 ball_pos = model.currentPlayer.ball.getPosition();
-                double cos = java.lang.Math.cos((double)model.currentPlayer.getAngleRadian());
-           	    double sin = java.lang.Math.sin((double)model.currentPlayer.getAngleRadian());
-                Vec2 pointer_pos = ball_pos.add(new Vec2((int)(10*cos), (int)(10*sin)));
-                pointer.setTransform(pointer_pos, 0);
-             }
-             else  // si ce n'est à aucun des joueurs de jouer (balle en mouvement)
-                pointer.setTransform(new Vec2(0,-10), 0);  // we hide the pointer
-                
-                
             world.step(); // Move all objects
             //panel.setCameraPosition(ball.getPosition().add(new Vec2(0,20))); // The camera will follow the ball
             panel.setCameraPosition(new Vec2(0,36));

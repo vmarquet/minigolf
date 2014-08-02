@@ -174,6 +174,22 @@ public class DrawingPanel extends JPanel implements Serializable {
            G = Math.min(2f-(power*2), 1);
            imageGraphics.setColor(new Color(R,G,B));
            imageGraphics.fillRect(33, 400-2*model.currentPlayer.getPower(), 26, 2*model.currentPlayer.getPower());
+
+           // we check if we have to draw the pointer which show the angle
+           if ( model.currentPlayer.isBallRolling == false ) {
+              imageGraphics.setColor(Color.RED);
+              Vec2 ball_pos = model.currentPlayer.ball.getPosition();
+              // we convert jbox2d position to a JPanel position
+              double x = 1280/2 + 10*ball_pos.x;
+              double y = 720 - 10*ball_pos.y;
+              // we compute the position of the pointer
+              double cos = java.lang.Math.cos((double)model.currentPlayer.getAngleRadian());
+              double sin = java.lang.Math.sin((double)model.currentPlayer.getAngleRadian());
+              x += 100*cos;
+              y -= 100*sin;
+              // we draw the pointer
+              imageGraphics.fillOval((int)x, (int)y, 5, 5);
+           }
            
            // draw an icon to show whoose turn it is
            imageGraphics.setColor(Color.WHITE);

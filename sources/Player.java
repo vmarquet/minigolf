@@ -55,20 +55,20 @@ public class Player
    }
    public void increaseAngle() {
       if (this.angle < 180)
-        this.angle += 5;
+        this.angle += 2;
       if (this.angle > 180)
         this.angle = 180;
       return;
    }
    public void decreaseAngle() {
       if (this.angle > 0)
-        this.angle -= 5;
+        this.angle -= 2;
       if (this.angle < 0)
         this.angle = 0;
       return;
    }
    public double getAngleRadian() {
-      return (this.angle/180.0)*java.lang.Math.PI;
+      return ((double)this.angle/180.0)*java.lang.Math.PI;
    }
    public void increasePower() {
       if (this.power < 100)

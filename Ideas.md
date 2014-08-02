@@ -1,6 +1,7 @@
 Gameplay
 --------
 * give rotation to the ball, like Manigolf
+* a practice/training mode
 
 Level design
 ------------
@@ -11,6 +12,5 @@ Level design
 
 Graphics
 --------
-* the angle indicator is crap, rewrite it
-    * if the ball is near the edge of screen, the indicator is drawn outside window, so we should automatically draw it on the other side of the ball
+* if the ball is near the edge of screen, the indicator is drawn outside window, so we should automatically draw it on the other side of the ball
 * display a big message for a few seconds when it's another player's turn
