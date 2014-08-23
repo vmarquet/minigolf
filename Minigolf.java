@@ -39,7 +39,8 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
        frame = new JFrame("Virtual Minigolf  [1280*720]");
        Image icon = new ImageIcon("./img/icon2.png").getImage();
        frame.setIconImage(icon);
-       frame.setMinimumSize(this.panel.getPreferredSize());
+       frame.setSize(this.panel.getPreferredSize());
+       frame.setResizable(false);
        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        frame.setLayout(new BorderLayout());  // choisir un autre layout pour faire des choses plus précises
                                              // borderLayout ne permet que centre, haut, bas, gauche, droite
@@ -48,13 +49,29 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
     
     public static void main(String[] args) {
        System.out.println("Welcome to Virtual Minigolf !");
+
+       // we set the GUI style to the OS style instead of Swing default theme "metal"
+       try {
+          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+       } catch(Exception e) {
+          throw new RuntimeException(e);
+       }
+
        Minigolf golf = new Minigolf();
+
+       // we play all levels
        for(int i=1; i<4; i++)
          golf.playHole(i);
+
+       // we show high scores
        golf.showHighScores();
+
+       // golf.menu();
+       // in order to return to the menu, there are a few changes to make to menu()
+       // right now it's buggy
+
        System.out.println("Bye-bye !");
-       System.exit(-1);
-       //golf.menu();  // in order to do that, there are a few changes to make to menu()
+       System.exit(0);
     }
     
     public void menu() {
@@ -244,7 +261,6 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
                 model.currentPlayer.isBallSet = false;
                 this.nextPlayer();
              }
-             //System.out.println( model.currentPlayer.ball.getPosition().y );
              
              // we actualize ball.previousPos once per second
              if (tourDeBoucle == 60) {
@@ -403,10 +419,9 @@ public class Minigolf implements KeyListener, ContactListener, Serializable {
             break;
        }
     }
-    public void keyTyped(KeyEvent e) {
-    }
-    public void keyReleased(KeyEvent e) {
-    }
+    public void keyTyped(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {}
+
     private void nextPlayer() {  // change the current player to the next who hasn't finished the hole
        // operations on the ball
        model.currentPlayer.ball.setType(BodyType.STATIC); // we set to static, else the ball will fall when we set it to sensor
